@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "993617232181",
+    "project_id": "androidadplacer",
+    "storage_bucket": "androidadplacer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993617232181:android:c4cbcf0fd7e03f6d2e4c7c",
+        "android_client_info": {
+          "package_name": "com.harshil258.androidadplacer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCI6bnzFPdTQF9X7d8UhD4UcwTrbMJkLs0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

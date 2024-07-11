@@ -1,0 +1,145 @@
+# Gradle files
+.gradle/
+build/
+!gradle-wrapper.jar
+.gradle/
+local.properties
+**/build/
+**/out/
+.gradle/
+.idea/
+*.iml
+.gradle/
+.gradle/
+.idea/
+.gradle/
+**/build/
+**/out/
+.gradle/
+.idea/
+*.iml
+
+# Kotlin build files
+**/build/
+
+# Gradle Wrapper
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
+# Android Studio
+.idea
+*.iws
+*.iml
+*.ipr
+
+# APKs
+*.apk
+*.ap_
+
+# IntelliJ
+*.idea/workspace.xml
+*.idea/libraries
+*.idea/tasks.xml
+*.idea/dictionaries
+*.idea/vcs.xml
+.idea/**/modules.xml
+
+# VCS
+vcs.xml
+
+# User-specific files
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+
+# Log files
+*.log
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Keystore files
+*.jks
+
+# Android Studio Navigation Editor temp files
+.navigation/
+
+# Android Studio captures
+captures/
+
+# Uncomment if you wish to ignore the Android Studio gradle wrapper jar file
+# gradle-wrapper.jar
+
+# Google Services JSON file (contains API keys)
+#google-services.json
+
+# Crashlytics
+crashlytics.properties
+crashlytics-build.properties
+
+# Sonar
+/.scannerwork/
+/.sonar/
+/build/
+/gradle/
+/**/build/
+.idea/
+.gradle/
+local.properties
+**/build/
+/app/build/
+
+# Android Studio/IntelliJ
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# Generated files
+/generated/
+
+# Uncomment if you have your own gradle.properties
+# gradle.properties
+
+# Ignore Gradle caches and project-specific cache files
+.gradle/
+.idea/
+gradle.properties
+gradlew
+gradlew.bat
+.idea/
+.idea/workspace.xml
+.idea/libraries
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.gradle/
+**/build/
+**/out/
+.idea/modules.xml
+.idea/misc.xml
+
+# Ignore the .idea folder and the workspace file
+.idea/
+
+# Ignore the APK files
+*.apk
+
+# Ignore local configuration file
+local.properties
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore lint/inspection results
+inspection-results
+
+# Ignore Android Studio files
+/.idea/workspace.xml
+/.idea/libraries/
+/.idea/tasks.xml
+/.idea/dictionaries/

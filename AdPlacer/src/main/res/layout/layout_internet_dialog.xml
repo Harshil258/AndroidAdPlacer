@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/_10sdp"
+    android:elevation="0dp"
+    app:cardBackgroundColor="@color/theme_bg"
+    app:cardCornerRadius="@dimen/_10sdp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_25sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:text="No Internet"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_19sdp"
+            android:textStyle="bold" />
+
+
+
+        <TextView
+            android:id="@+id/txtDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/_25sdp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:gravity="center"
+            android:text="No internet connection!\nCheck your internet connection"
+            android:textColor="#9595AA"
+            android:textSize="@dimen/_11sdp" />
+
+        <TextView
+            android:id="@+id/txtSuccess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:text="Success"
+            android:textColor="@color/white"
+            android:textSize="@dimen/_14sdp"
+            android:visibility="gone" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_15sdp"
+            android:layout_marginHorizontal="@dimen/_25sdp"
+            android:gravity="start">
+
+            <TextView
+                android:id="@+id/txtNegative"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="@dimen/_35sdp"
+                android:background="@drawable/bg_corner_search"
+                android:layout_marginRight="@dimen/_5sdp"
+                android:backgroundTint="@color/theme_fg"
+                android:gravity="center"
+                android:text="Exit"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_13sdp" />
+
+
+            <TextView
+                android:id="@+id/txtPositive"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="@dimen/_35sdp"
+                android:layout_marginLeft="@dimen/_5sdp"
+                android:background="@drawable/bg_corner_search"
+
+                android:gravity="center"
+                android:text="Retry"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_13sdp" />
+
+        </LinearLayout>
+       <!-- <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/txtNegative"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:background="@drawable/bg_corner_15"
+
+                android:backgroundTint="#485A6B"
+                android:gravity="center"
+                android:text="Exit"
+                android:textColor="#8CC6FB"
+                android:textSize="@dimen/_12sdp" />
+
+
+            <TextView
+                android:id="@+id/txtPositive"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="@dimen/_30sdp"
+                android:layout_marginLeft="@dimen/_20sdp"
+                android:background="@drawable/bg_corner_15"
+                android:backgroundTint="#485A6B"
+                android:gravity="center"
+                android:text="Retry"
+                android:textColor="#8CC6FB"
+                android:textSize="@dimen/_12sdp" />
+
+        </LinearLayout>-->
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

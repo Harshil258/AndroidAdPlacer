@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NativeSmallView">
+        <attr name="shouldLoadDirectSmall" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="BannerView">
+        <attr name="shouldLoadDirectBanner" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="BannerViewMedium">
+        <attr name="shouldLoadDirectBannerMedium" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="NativeMediumView">
+        <attr name="shouldLoadDirectMedium" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="NativeBigView">
+        <attr name="shouldLoadDirectBig" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="NativeBigOrSmallView">
+        <attr name="shouldLoadDirect" format="boolean" />
+    </declare-styleable>
+    <declare-styleable name="NativeMediumOrSmallView">
+        <attr name="shouldLoadDirectMS" format="boolean" />
+    </declare-styleable>
+</resources>

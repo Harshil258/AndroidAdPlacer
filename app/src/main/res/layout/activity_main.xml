@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+      <!--      <com.example.adplacer.Ads.adViews.NativeBigView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectBig="true"/>-->
+
+            <com.harshil258.adplacer.adViews.NativeBigOrSmallView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirect="true"/>
+
+            <com.harshil258.adplacer.adViews.NativeSmallView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectSmall="true"/>
+
+            <com.harshil258.adplacer.adViews.NativeSmallView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectSmall="true"/>
+
+
+
+            <!--
+
+
+            <com.example.adplacer.Ads.adViews.NativeMediumView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectBig="true"/>
+
+            <com.example.adplacer.Ads.adViews.NativeBigOrSmallView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectBig="true"/>
+
+            <com.example.adplacer.Ads.adViews.NativeMediumOrSmallView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectBig="true"/>-->
+
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/next"
+                android:text="next"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
