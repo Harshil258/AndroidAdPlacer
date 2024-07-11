@@ -568,7 +568,7 @@ class AdPlacerApplication(instance: Application) {
             val packageInfo = activity?.packageManager?.getPackageInfo(activity.packageName, 0)
             packageInfo?.versionName
         } catch (e: Exception) {
-            Logger.e("getCurrentAppVersion", "Failed to get current app version" + e)
+            Logger.e("getCurrentAppVersion", "Failed to get current app version  " + e)
             null
         }
     }
