@@ -24,7 +24,6 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.harshil258.adplacer.interfaces.AdCallback
-import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.adViews.BannerViewMedium
 import com.harshil258.adplacer.adViews.NativeBigView
 import com.harshil258.adplacer.interfaces.DialogCallBack
@@ -38,6 +37,7 @@ import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
 import com.harshil258.adplacer.R
+import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.app.AdPlacerApplication.Companion.shouldGoWithoutInternet
 
