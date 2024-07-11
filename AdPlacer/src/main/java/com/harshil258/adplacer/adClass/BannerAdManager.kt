@@ -17,6 +17,7 @@ class BannerAdManager {
     var TAG: String = "BannerAd"
 
 
+
     fun showBannerAd(
         activity: Activity,
         rlBanner: RelativeLayout,
