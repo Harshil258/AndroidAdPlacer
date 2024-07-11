@@ -20,7 +20,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -51,6 +51,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
 
-//    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.25")
+//    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.26")
 
 }
