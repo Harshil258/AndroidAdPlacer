@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
+
         findViewById<Button>(R.id.next).setOnClickListener {
             adPlacerApplication.interstitialManager.loadAndShowInter(runningActivity!!, object :
                 InterAdCallBack {

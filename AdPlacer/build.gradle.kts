@@ -65,6 +65,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.config)
     implementation(libs.firebase.analytics)
+    implementation("com.onesignal:OneSignal:[5.0.0, 5.99.99]")
 
 }
 
