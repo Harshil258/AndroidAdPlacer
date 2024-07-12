@@ -287,7 +287,7 @@ class AdPlacerApplication(instance: Application) {
             "got response: ${response.appDetails.appName}  adStatus :   ${response.appDetails.adStatus}"
         )
         try {
-//            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
+            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
 
 
             val currentVersion = getCurrentAppVersion(runningActivity)
@@ -575,11 +575,11 @@ class AdPlacerApplication(instance: Application) {
         }
     }
 
-//    fun showOneSignalNotificationPrompt(){
-//        CoroutineScope(Dispatchers.IO).launch {
-//            OneSignal.Notifications.requestPermission(false)
-//        }
-//    }
+    fun showOneSignalNotificationPrompt(){
+        CoroutineScope(Dispatchers.IO).launch {
+            OneSignal.Notifications.requestPermission(false)
+        }
+    }
 
     fun startTimerForContinueFlow(duration: Int) {
         try {

@@ -121,7 +121,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 adPlacerApplication?.startTimerForContinueFlow(12000)
             }
         }else if (activity is MainActivity){
-//            adPlacerApplication?.showOneSignalNotificationPrompt()
+            adPlacerApplication?.showOneSignalNotificationPrompt()
         }
     }
 
