@@ -38,3 +38,6 @@
 -keep public class com.harshil258.adplacer.utils.** {*;}
 -keep public class com.harshil258.adplacer.Ads.interfaces.** {*;}
 -dontwarn java.lang.invoke.StringConcatFactory
+-keep class com.onesignal.** { *; }
+-keepattributes *Annotation*
+-dontwarn com.onesignal.**
