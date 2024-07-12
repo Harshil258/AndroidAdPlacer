@@ -43,7 +43,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(project(":AdPlacer"))
+//    implementation(project(":AdPlacer"))
     implementation(libs.firebase.config.ktx)
     implementation(libs.firebase.config)
     testImplementation(libs.junit)
@@ -51,6 +51,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
 
-//    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.24")
+    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.29")
 
 }
