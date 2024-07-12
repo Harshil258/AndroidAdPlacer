@@ -44,7 +44,6 @@ import com.google.gson.Gson
 import com.harshil258.adplacer.interfaces.DialogCallBack
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.R
-import com.onesignal.OneSignal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -285,7 +284,7 @@ class AdPlacerApplication(instance: Application) {
             "got response: ${response.appDetails.appName}  adStatus :   ${response.appDetails.adStatus}"
         )
         try {
-            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
+//            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
 
 
             val currentVersion = getCurrentAppVersion(runningActivity)
@@ -575,7 +574,7 @@ class AdPlacerApplication(instance: Application) {
 
     fun showOneSignalNotificationPrompt(){
         CoroutineScope(Dispatchers.IO).launch {
-            OneSignal.Notifications.requestPermission(false)
+//            OneSignal.Notifications.requestPermission(false)
         }
     }
 

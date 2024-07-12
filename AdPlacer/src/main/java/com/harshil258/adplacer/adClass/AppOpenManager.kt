@@ -19,21 +19,21 @@ class AppOpenManager {
         if (!isAppOpenEmpty()) {
             if (isAdAvailable || com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing) {
                 if (!com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing) {
-                    com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing = true
-                    com.harshil258.adplacer.adClass.AppOpenManager.Companion.appOpenAd!!.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    isAdShowing = true
+                    appOpenAd!!.fullScreenContentCallback = object : FullScreenContentCallback() {
                         override fun onAdClicked() {
                             super.onAdClicked()
                         }
 
                         override fun onAdDismissedFullScreenContent() {
-                            com.harshil258.adplacer.adClass.AppOpenManager.Companion.appOpenAd = null
-                            com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing = false
+                            appOpenAd = null
+                            isAdShowing = false
                             callBack.adDisplayedCallback(true)
                             loadAppOpen(activity, callBack)
                         }
 
                         override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                            com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing = false
+                            isAdShowing = false
                         }
 
                         override fun onAdImpression() {
@@ -41,7 +41,7 @@ class AppOpenManager {
                         }
 
                         override fun onAdShowedFullScreenContent() {
-                            com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing = true
+                            isAdShowing = true
                             try {
                                 AdPlacerApplication.adPlacerApplication.messagingCallback!!.hideSplashLoader()
                             } catch (e: Exception) {
