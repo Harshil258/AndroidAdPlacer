@@ -121,7 +121,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 adPlacerApplication?.startTimerForContinueFlow(12000)
             }
         }else if (activity is MainActivity){
-            adPlacerApplication?.showOneSignalNotificationPrompt()
+//            adPlacerApplication?.showOneSignalNotificationPrompt()
         }
     }
 
@@ -244,6 +244,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     override fun openHomeActivity() {
         Logger.e("TAGCOMMON", "MainActivity")
+
         runningActivity!!.finish()
         val intent = Intent(runningActivity, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -252,6 +253,12 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     override fun gotFirebaseResponse(firebaseRemoteConfig: FirebaseRemoteConfig) {
         sharedPrefConfig.appDetails.admobNativeAd = "/6499/example/native-video"
+
+
+    }
+
+    override fun startingTimerToChangeScreen() {
+
     }
 
     override fun openHowToUseActivity() {

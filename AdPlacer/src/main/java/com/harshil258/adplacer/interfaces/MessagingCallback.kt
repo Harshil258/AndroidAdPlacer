@@ -13,4 +13,5 @@ interface MessagingCallback {
     fun exitTheApplication()
     fun showNetworkDialog()
     fun gotFirebaseResponse(firebaseConfig: FirebaseRemoteConfig)
+    fun startingTimerToChangeScreen()
 }

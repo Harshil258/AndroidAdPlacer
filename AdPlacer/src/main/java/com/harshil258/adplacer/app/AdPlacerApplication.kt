@@ -123,6 +123,8 @@ class AdPlacerApplication(instance: Application) {
 
     fun continueAppFlow() {
         Logger.e("TAGCOMMON", "continueAppFlow:")
+
+
         handler.removeCallbacksAndMessages(null)
 
         val activity = runningActivity ?: return
@@ -285,7 +287,7 @@ class AdPlacerApplication(instance: Application) {
             "got response: ${response.appDetails.appName}  adStatus :   ${response.appDetails.adStatus}"
         )
         try {
-            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
+//            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
 
 
             val currentVersion = getCurrentAppVersion(runningActivity)
@@ -573,11 +575,11 @@ class AdPlacerApplication(instance: Application) {
         }
     }
 
-    fun showOneSignalNotificationPrompt(){
-        CoroutineScope(Dispatchers.IO).launch {
-            OneSignal.Notifications.requestPermission(false)
-        }
-    }
+//    fun showOneSignalNotificationPrompt(){
+//        CoroutineScope(Dispatchers.IO).launch {
+//            OneSignal.Notifications.requestPermission(false)
+//        }
+//    }
 
     fun startTimerForContinueFlow(duration: Int) {
         try {
@@ -655,6 +657,7 @@ class AdPlacerApplication(instance: Application) {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        messagingCallback?.startingTimerToChangeScreen()
         handler2.postDelayed(runnable2, duration.toLong())
     }
 

@@ -3,6 +3,7 @@ package com.harshil258.adplacer.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.harshil258.adplacer.models.AdsDetails
 import com.harshil258.adplacer.models.ApiResponse
 import com.harshil258.adplacer.models.AppDetails
@@ -76,6 +77,7 @@ class SharedPrefConfig(private val context: Context) {
         get() = apiResponse.appDetails
         set(value) {
             val updatedApiResponse = apiResponse.copy(appDetails = value)
+            Log.e("rdhdhsdthjtg", ": ${updatedApiResponse.appDetails.adStatus}")
             apiResponse = updatedApiResponse
         }
 
