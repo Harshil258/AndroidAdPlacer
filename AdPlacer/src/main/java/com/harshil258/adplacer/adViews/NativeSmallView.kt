@@ -11,6 +11,7 @@ import com.harshil258.adplacer.R
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
+import com.harshil258.adplacer.utils.Logger
 
 class NativeSmallView : RelativeLayout {
     private var shouldLoadDirect = false

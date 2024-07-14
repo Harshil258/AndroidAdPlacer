@@ -39,7 +39,9 @@ import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.app.AdPlacerApplication
-import com.harshil258.adplacer.app.AdPlacerApplication.Companion.shouldGoWithoutInternet
+import com.harshil258.adplacer.utils.Constants.isAppInForeground
+import com.harshil258.adplacer.utils.Constants.isSplashRunning
+import com.harshil258.adplacer.utils.Constants.shouldGoWithoutInternet
 import com.harshil258.adplacer.utils.STATUS
 
 
@@ -69,11 +71,11 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
-        if (!AdPlacerApplication.isSplashRunning) {
-            adPlacerApplication?.showAppOpen()
-        } else if (AdPlacerApplication.isSplashRunning && adPlacerApplication?.appOpenManager?.isAdAvailable == true && !com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing
+        if (!isSplashRunning) {
+            adPlacerApplication?.showAppOpenAd()
+        } else if (isSplashRunning && adPlacerApplication?.appOpenManager?.isAdAvailable == true && !com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing
         ) {
-            adPlacerApplication?.showAppOpen()
+            adPlacerApplication?.showAppOpenAd()
         } else {
         }
     }
@@ -83,7 +85,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
         super.onActivityPreCreated(activity, savedInstanceState)
         runningActivity = activity
         if (activity is LauncherActivity) {
-            AdPlacerApplication.isSplashRunning = true
+            isSplashRunning = true
         }
     }
 
@@ -108,14 +110,14 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
         )
 
         if (activity is LauncherActivity) {
-            AdPlacerApplication.isSplashRunning = true
+            isSplashRunning = true
             if (!GlobalUtils().isNetworkAvailable(applicationContext)) {
                 if (shouldGoWithoutInternet) {
                     adPlacerApplication?.startTimerForContinueFlow(10)
                     return
                 }
                 adPlacerApplication?.initClickCounts()
-                adPlacerApplication?.showInteretDialog()
+                adPlacerApplication?.showInternetDialog()
                 return
             } else {
                 Logger.i("srherhse", "apiResponse called")
@@ -274,7 +276,8 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
 
-    override fun openExtraaStartActivity() {
+
+    override fun openExtraStartActivity() {
 //        val intent = Intent(runningActivity, StartActivity::class.java)
 //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //        startActivity(intent)
