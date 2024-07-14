@@ -9,7 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.harshil258.adplacer.interfaces.InterAdCallBack
 import com.harshil258.adplacer.utils.Constants.runningActivity
-import com.harshil258.adplacer.app.AdPlacerApplication.Companion.adPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
 
 class MainActivity : AppCompatActivity() {

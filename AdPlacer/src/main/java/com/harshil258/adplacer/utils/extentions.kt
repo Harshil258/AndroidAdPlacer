@@ -22,14 +22,13 @@ object extentions {
     }
 
     fun isNativeEmpty(): Boolean {
-        Log.e("TAG1232", "TAG1232  isAdStatusOn: ${isAdStatusOn()}")
-        Log.e("TAG1232", "TAG1232  isNativeEmpty: ${runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }.isNullOrEmpty() || !isAdStatusOn()}")
+        Logger.e("TAG1232", "TAG1232  isAdStatusOn: ${isAdStatusOn()}")
+        Logger.e("TAG1232", "TAG1232  isNativeEmpty: ${runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }.isNullOrEmpty() || !isAdStatusOn()}")
         return runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }.isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isInterstitialEmpty(): Boolean {
-        return runningActivity?.let { sharedPrefConfig.appDetails.admobInterstitialAd }
-            .isNullOrEmpty() || !isAdStatusOn()
+        return runningActivity?.let { sharedPrefConfig.appDetails.admobInterstitialAd }.isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isRewardEmpty(): Boolean {

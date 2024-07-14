@@ -40,6 +40,7 @@ import com.harshil258.adplacer.R
 import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.app.AdPlacerApplication.Companion.shouldGoWithoutInternet
+import com.harshil258.adplacer.utils.STATUS
 
 
 //@Obfuscate
@@ -101,12 +102,15 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         // activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         runningActivity = activity
-        Logger.i("TAGCOMMON", "onActivityCreated  runningActivity  ${runningActivity?.localClassName}"  )
+        Logger.i(
+            "TAGCOMMON",
+            "onActivityCreated  runningActivity  ${runningActivity?.localClassName}"
+        )
 
         if (activity is LauncherActivity) {
             AdPlacerApplication.isSplashRunning = true
             if (!GlobalUtils().isNetworkAvailable(applicationContext)) {
-                if(shouldGoWithoutInternet){
+                if (shouldGoWithoutInternet) {
                     adPlacerApplication?.startTimerForContinueFlow(10)
                     return
                 }
@@ -120,7 +124,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 adPlacerApplication?.fetchApiResponse(type)
                 adPlacerApplication?.startTimerForContinueFlow(12000)
             }
-        }else if (activity is MainActivity){
+        } else if (activity is MainActivity) {
             adPlacerApplication?.showOneSignalNotificationPrompt()
         }
     }
@@ -179,7 +183,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
 
     override fun onActivityPaused(activity: Activity) {
-        AdPlacerApplication.isAppInForeground = false
+        isAppInForeground = false
         try {
             if (InterstitialManager.timer != null) {
                 InterstitialManager.timer?.pause()
@@ -258,6 +262,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
     override fun startingTimerToChangeScreen() {
+        sharedPrefConfig.appDetails = sharedPrefConfig.appDetails.copy(adStatus = "OFF")
 
     }
 
@@ -340,12 +345,15 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                         ADTYPE.NATIVE -> {
                             mediumBanner.visibility = View.GONE
                             myAdViewBig.visibility = View.VISIBLE
-                            adPlacerApplication?.nativeAdManager?.callBigOnly(activity, myAdViewBig, object :
-                                AdCallback {
-                                override fun adDisplayedCallback(displayed: Boolean) {
+                            adPlacerApplication?.nativeAdManager?.callBigOnly(
+                                activity,
+                                myAdViewBig,
+                                object :
+                                    AdCallback {
+                                    override fun adDisplayedCallback(displayed: Boolean) {
 
-                                }
-                            })
+                                    }
+                                })
                         }
 
                         else -> {
@@ -360,9 +368,6 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
             Logger.e("showExitDialog", "Running activity is null, cannot show dialog.")
         }
     }
-
-
-
 
 
     companion object {

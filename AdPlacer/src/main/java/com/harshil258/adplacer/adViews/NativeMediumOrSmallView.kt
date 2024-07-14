@@ -8,6 +8,7 @@ import android.widget.RelativeLayout
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 
 class NativeMediumOrSmallView : RelativeLayout {
     private var shouldLoadDirect = false
@@ -56,7 +57,7 @@ class NativeMediumOrSmallView : RelativeLayout {
     fun loadAd(
         activity: Activity?, adDisplayedCallback: AdCallback
     ) {
-        AdPlacerApplication.adPlacerApplication.nativeAdManager.callMediumOrSmall(
+        adPlacerApplication.nativeAdManager.callMediumOrSmall(
             activity!!,
             myAdViewMedium!!,
             myAdViewSmall!!, adDisplayedCallback

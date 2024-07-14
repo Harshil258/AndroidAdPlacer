@@ -20,6 +20,8 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.isAppInForeground
+import com.harshil258.adplacer.utils.Logger
 
 class InterstitialManager {
     var TAG: String = "Interstitial"
@@ -27,16 +29,14 @@ class InterstitialManager {
 
     fun isCounterSatisfy(activity: Activity): Boolean {
         val appDetail = sharedPrefConfig.appDetails
-
-
         try {
             if (!isInterstitialEmpty()) {
-                val counter = appDetail.interstitialAdFrequency?.takeIf {
+                val counter = appDetail.interstitialAdFrequency.takeIf {
                     it.isNotEmpty() && TextUtils.isDigitsOnly(it)
                 }?.toInt() ?: 3
 
                 if (clickCounts == counter - 1) {
-                    preloadInterAd(activity)
+                    preloadInterstitialAd(activity)
                 }
                 if (clickCounts >= counter) {
                     return true
@@ -56,7 +56,7 @@ class InterstitialManager {
 
 
     fun loadAndShowInter(activity: Activity, callBack: InterAdCallBack) {
-        AdPlacerApplication.isAppInForeground = true
+        isAppInForeground = true
         if (checkMultipleClick(750)) {
             return
         }
@@ -80,7 +80,7 @@ class InterstitialManager {
                 if (isCounterSatisfy(activity)) {
                     startTimerForContinueFlow(activity, 5000, callBack)
                 } else {
-                    if (AdPlacerApplication.isAppInForeground) {
+                    if (isAppInForeground) {
                         callBack.onContinueFlow()
                     }
                 }
@@ -104,7 +104,7 @@ class InterstitialManager {
                 showLoadingDialog(activity, callBack)
                 startTimerForContinueFlow(activity, 5000, callBack)
             } else {
-                if (AdPlacerApplication.isAppInForeground) {
+                if (isAppInForeground) {
                     callBack.onContinueFlow()
                 }
             }
@@ -116,7 +116,7 @@ class InterstitialManager {
         dialog: Dialog?,
         callBack: InterAdCallBack
     ) {
-        AdPlacerApplication.isAppInForeground = true
+        isAppInForeground = true
 
         if (com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
             return
@@ -140,7 +140,7 @@ class InterstitialManager {
                 if (isCounterSatisfy(activity)) {
                     startTimerForContinueFlow(activity, 5000, callBack)
                 } else {
-                    if (AdPlacerApplication.isAppInForeground) {
+                    if (isAppInForeground) {
                         callBack.onContinueFlow()
                     }
                 }
@@ -166,7 +166,7 @@ class InterstitialManager {
                 }
                 startTimerForContinueFlow(activity, 5000, callBack)
             } else {
-                if (AdPlacerApplication.isAppInForeground) {
+                if (isAppInForeground) {
                     callBack.onContinueFlow()
                 }
             }
@@ -187,17 +187,17 @@ class InterstitialManager {
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
                     isAdLoading = false
                     mInterstitialAd = interstitialAd
-                    Log.e(TAG, "onAdLoaded: AAAA")
+                    Logger.e(TAG, "onAdLoaded: AAAA")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isAdLoading = false
                     mInterstitialAd = null
                     stopLoadingdialog()
-                    Log.e(TAG, "onAdFailedToLoad: loadAdError AAAAA ${loadAdError}")
+                    Logger.e(TAG, "onAdFailedToLoad: loadAdError AAAAA ${loadAdError}")
 
                     if (callBack != null) {
-                        if (AdPlacerApplication.isAppInForeground) {
+                        if (isAppInForeground) {
                             callBack.onContinueFlow()
                         }
                     }
@@ -205,7 +205,7 @@ class InterstitialManager {
             })
     }
 
-    fun preloadInterAd(activity: Activity) {
+    fun preloadInterstitialAd(activity: Activity) {
         if (isAdLoading || isAdShowing) {
             stopLoadingdialog()
             return
@@ -250,10 +250,10 @@ class InterstitialManager {
     ) {
         timer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 1000L) {
             override fun onTick(millisUntilFinished: Long) {
-                if (com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing || !AdPlacerApplication.isAppInForeground) {
+                if (com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing || !isAppInForeground) {
                     timer!!.pause()
                     stopLoadingdialog()
-                } else if (AdPlacerApplication.isAppInForeground && mInterstitialAd != null && !isAdLoading) {
+                } else if (isAppInForeground && mInterstitialAd != null && !isAdLoading) {
                     if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
                         showInterAd(activity, callBack)
                     }
@@ -300,18 +300,18 @@ class InterstitialManager {
     }
 
     fun showInterAd(activity: Activity?, callBack: InterAdCallBack) {
-        Log.e(TAG, "showInterAd: 1")
+        Logger.e(TAG, "showInterAd: 1")
         if (isAdLoading) {
             stopLoadingdialog()
             callBack.onContinueFlow()
             return
         }
-        Log.e(TAG, "showInterAd: 2")
+        Logger.e(TAG, "showInterAd: 2")
         if (isAdShowing) {
             stopLoadingdialog()
             return
         }
-        Log.e(TAG, "showInterAd: 3")
+        Logger.e(TAG, "showInterAd: 3")
 
         if (mInterstitialAd == null) {
             stopLoadingdialog()
@@ -319,7 +319,7 @@ class InterstitialManager {
             return
         }
 
-        Log.e(TAG, "showInterAd: 4")
+        Logger.e(TAG, "showInterAd: 4")
         mInterstitialAd!!.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
             }
@@ -339,21 +339,21 @@ class InterstitialManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 isAdShowing = false
                 mInterstitialAd = null
-                if (AdPlacerApplication.isAppInForeground) {
+                if (isAppInForeground) {
                     callBack.onContinueFlow()
                 }
             }
 
             override fun onAdImpression() {
-                Log.e(TAG, "showInterAd: 5 impression")
+                Logger.e(TAG, "showInterAd: 5 impression")
             }
 
             override fun onAdShowedFullScreenContent() {
-                Log.e(TAG, "showInterAd: 6")
+                Logger.e(TAG, "showInterAd: 6")
                 isAdShowing = true
                 stopLoadingdialog()
                 mInterstitialAd = null
-                Log.e(TAG, "showInterAd: 7  clickCounts  $clickCounts")
+                Logger.e(TAG, "showInterAd: 7  clickCounts  $clickCounts")
                 if (clickCounts >= counter) {
                     clickCounts = 1
                 }

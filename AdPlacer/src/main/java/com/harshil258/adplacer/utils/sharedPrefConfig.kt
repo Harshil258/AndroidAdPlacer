@@ -1,6 +1,7 @@
 package com.harshil258.adplacer.utils
 
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
@@ -23,17 +24,14 @@ class SharedPrefConfig(private val context: Context) {
 
 
     companion object {
+        @SuppressLint("StaticFieldLeak")
         lateinit var sharedPrefConfig: SharedPrefConfig
-
 
         fun sharedPrefConfigInstance(context: Context){
             sharedPrefConfig = SharedPrefConfig(context)
         }
 
     }
-
-    val APPOPENCOUNT = "APPOPENCOUNT"
-    val PREMIUM_PLAN = "PREMIUM_PLAN"
 
 
     var isLoadingFirstTime: Boolean
@@ -59,15 +57,11 @@ class SharedPrefConfig(private val context: Context) {
         get() = prefs.load("isResponseGot", false)
         set(value) = prefs.save("isResponseGot", value)
 
-
     var isHowToUseShowDone: Boolean
         get() = prefs.load("isHowToUseShowDone", false)
         set(value) = prefs.save("isHowToUseShowDone", value)
 
 
-    var diaryfetchedid: Int?
-        get() = prefs.load("diaryidfetchedkey", 0)
-        set(value) = prefs.save("diaryidfetchedkey", value)
 
     var apiResponse: ApiResponse
         get() = prefs.load("API_RESPONSE", ApiResponse())
@@ -77,7 +71,7 @@ class SharedPrefConfig(private val context: Context) {
         get() = apiResponse.appDetails
         set(value) {
             val updatedApiResponse = apiResponse.copy(appDetails = value)
-            Log.e("rdhdhsdthjtg", ": ${updatedApiResponse.appDetails.adStatus}")
+            Logger.e("rdhdhsdthjtg", ": ${updatedApiResponse.appDetails.adStatus}")
             apiResponse = updatedApiResponse
         }
 

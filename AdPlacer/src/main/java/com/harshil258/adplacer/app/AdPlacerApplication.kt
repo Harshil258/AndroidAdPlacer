@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -44,6 +43,12 @@ import com.google.gson.Gson
 import com.harshil258.adplacer.interfaces.DialogCallBack
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.R
+import com.harshil258.adplacer.api.AdApiClient.Companion.BASE_URL_API
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
+import com.harshil258.adplacer.utils.Constants.isSplashRunning
+import com.harshil258.adplacer.utils.Constants.preLoadInterstitial
+import com.harshil258.adplacer.utils.Constants.preLoadNative
+import com.harshil258.adplacer.utils.Constants.preLoadReward
 import com.onesignal.OneSignal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,29 +63,36 @@ import retrofit2.Response
 class AdPlacerApplication(instance: Application) {
 
 
-    companion object {
-        @JvmField
-        var isAppInForeground: Boolean = false
-        @JvmField
-        var isSplashRunning: Boolean = false
-        lateinit var adPlacerApplication: AdPlacerApplication
-        var shouldGoWithoutInternet = false
-    }
 
 
     var appOpenManager: com.harshil258.adplacer.adClass.AppOpenManager
 
-
-    @JvmField
     val interstitialManager: InterstitialManager
     val rewardClass: RewardAdManager
-
-    @JvmField
     val nativeAdManager: NativeAdManager
-
-    @JvmField
     var messagingCallback: MessagingCallback? = null
     var homeButtonReceiver: HomeButtonReceiver
+
+
+    init {
+        adPlacerApplication = this
+        homeButtonReceiver = HomeButtonReceiver()
+        val filter = IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            instance.registerReceiver(homeButtonReceiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            instance.registerReceiver(homeButtonReceiver, filter)
+        }
+
+        MobileAds.initialize(instance) { }
+
+        appOpenManager = com.harshil258.adplacer.adClass.AppOpenManager()
+        interstitialManager = InterstitialManager()
+        rewardClass = RewardAdManager()
+        nativeAdManager = NativeAdManager()
+    }
 
 
     init {
@@ -95,7 +107,7 @@ class AdPlacerApplication(instance: Application) {
     }
 
 
-    fun showAppOpen() {
+    fun showAppOpenAd() {
         if (InterstitialManager.isAdShowing) {
             return
         }
@@ -122,55 +134,70 @@ class AdPlacerApplication(instance: Application) {
 
 
     fun continueAppFlow() {
-        Logger.e("TAGCOMMON", "continueAppFlow:")
-
+        Logger.e("TAGCOMMON", "continueAppFlow: Called")
 
         handler.removeCallbacksAndMessages(null)
 
-        val activity = runningActivity ?: return
+        val activity = runningActivity ?: run {
+            Logger.e("TAGCOMMON", "continueAppFlow: No running activity found. Exiting function.")
+            return
+        }
 
         val appDetails = sharedPrefConfig.appDetails
         val whichScreenToGo = appDetails.whichScreenToGo
 
-        Logger.e("TAGCOMMON", "whichScreenToGo: $whichScreenToGo")
-        Logger.e("TAGCOMMON", "howtousestart: ${appDetails.howtousestart}")
-        Logger.e("TAGCOMMON", "isHowToUseShowDone: ${sharedPrefConfig.isHowToUseShowDone}")
+        Logger.e("TAGCOMMON", "continueAppFlow: whichScreenToGo = $whichScreenToGo")
+        Logger.e("TAGCOMMON", "continueAppFlow: howtousestart = ${appDetails.howtousestart}")
+        Logger.e(
+            "TAGCOMMON",
+            "continueAppFlow: isHowToUseShowDone = ${sharedPrefConfig.isHowToUseShowDone}"
+        )
 
-        if (appDetails.howtousestart == STATUS.ON.name && !sharedPrefConfig.isHowToUseShowDone) {
-            Logger.e("TAGCOMMON", "Opening HowToUseActivity.")
-            messagingCallback?.openHowToUseActivity()
-        } else if (whichScreenToGo.isNotEmpty()) {
-            Logger.e("TAGCOMMON", "whichScreenToGo is not empty. Value: $whichScreenToGo")
+        when {
+            appDetails.howtousestart == STATUS.ON.name && !sharedPrefConfig.isHowToUseShowDone -> {
+                Logger.e("TAGCOMMON", "continueAppFlow: Opening HowToUseActivity.")
+                messagingCallback?.openHowToUseActivity()
+            }
 
-            when (whichScreenToGo) {
-                SCREENS.EXTRA_START.name -> {
-                    Logger.e("TAGCOMMON", "Opening ExtraaStartActivity.")
-                    messagingCallback?.openExtraaStartActivity()
-                }
+            whichScreenToGo.isNotEmpty() -> {
+                Logger.e(
+                    "TAGCOMMON",
+                    "continueAppFlow: whichScreenToGo is not empty. Value: $whichScreenToGo"
+                )
 
-                SCREENS.START.name -> {
-                    Logger.e("TAGCOMMON", "Opening StartActivity.")
-                    messagingCallback?.openStartActivity()
-                }
+                when (whichScreenToGo) {
+                    SCREENS.EXTRA_START.name -> {
+                        Logger.e("TAGCOMMON", "continueAppFlow: Opening ExtraStartActivity.")
+                        messagingCallback?.openExtraStartActivity()
+                    }
 
-                else -> {
-                    Logger.e("TAGCOMMON", "Opening HomeActivity.")
-                    messagingCallback?.openHomeActivity()
+                    SCREENS.START.name -> {
+                        Logger.e("TAGCOMMON", "continueAppFlow: Opening StartActivity.")
+                        messagingCallback?.openStartActivity()
+                    }
+
+                    else -> {
+                        Logger.e("TAGCOMMON", "continueAppFlow: Opening HomeActivity.")
+                        messagingCallback?.openHomeActivity()
+                    }
                 }
             }
-        } else {
-            Logger.e(
-                "TAGCOMMON",
-                "whichScreenToGo is empty or not digits only. Opening HomeActivity."
-            )
-            messagingCallback?.openHomeActivity()
+
+            else -> {
+                Logger.e(
+                    "TAGCOMMON",
+                    "continueAppFlow: whichScreenToGo is empty or invalid. Opening HomeActivity."
+                )
+                messagingCallback?.openHomeActivity()
+            }
         }
 
         activity.finish()
-        Logger.e("TAGCOMMON", "Running activity finished.")
+        Logger.e("TAGCOMMON", "continueAppFlow: Running activity finished.")
         isSplashRunning = false
-        Logger.e("TAGCOMMON", "Splash screen is not running.")
+        Logger.e("TAGCOMMON", "continueAppFlow: Splash screen is not running.")
     }
+
 
     fun initializeAndFetchFirebaseConfig(
         onSuccess: (FirebaseRemoteConfig) -> Unit,
@@ -178,6 +205,11 @@ class AdPlacerApplication(instance: Application) {
         retries: Int = 3,
         retryDelay: Long = 2000 // delay in milliseconds
     ) {
+        Logger.e(
+            "FirebaseConfig",
+            "initializeAndFetchFirebaseConfig: Called with retries=$retries and retryDelay=$retryDelay ms"
+        )
+
         val firebaseRemoteConfig: FirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 
         // Set default values for Remote Config parameters
@@ -185,23 +217,41 @@ class AdPlacerApplication(instance: Application) {
             "temp_response" to "default value" // Replace with your default value
         )
         firebaseRemoteConfig.setDefaultsAsync(configDefaults)
+        Logger.e(
+            "FirebaseConfig",
+            "initializeAndFetchFirebaseConfig: Default values set: $configDefaults"
+        )
 
         val configSettings = FirebaseRemoteConfigSettings.Builder()
             .setMinimumFetchIntervalInSeconds(2) // Set to 2 seconds
             .build()
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings)
+        Logger.e(
+            "FirebaseConfig",
+            "initializeAndFetchFirebaseConfig: Config settings applied: $configSettings"
+        )
 
         // Fetch and activate the remote config values
         firebaseRemoteConfig.fetchAndActivate()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    Logger.e(
+                        "FirebaseConfig",
+                        "initializeAndFetchFirebaseConfig: Fetch and activate successful"
+                    )
                     // Call the success callback
                     onSuccess(firebaseRemoteConfig)
                 } else {
-                    // Handle the error
-                    Logger.e("LauncherActivity", "Failed to fetch config")
+                    Logger.e(
+                        "FirebaseConfig",
+                        "initializeAndFetchFirebaseConfig: Failed to fetch config. Retries left: $retries"
+                    )
 
                     if (retries > 0) {
+                        Logger.e(
+                            "FirebaseConfig",
+                            "initializeAndFetchFirebaseConfig: Retrying in $retryDelay ms"
+                        )
                         // Retry after a delay
                         Handler(Looper.getMainLooper()).postDelayed({
                             initializeAndFetchFirebaseConfig(
@@ -212,6 +262,10 @@ class AdPlacerApplication(instance: Application) {
                             )
                         }, retryDelay)
                     } else {
+                        Logger.e(
+                            "FirebaseConfig",
+                            "initializeAndFetchFirebaseConfig: No retries left. Invoking onFailure callback"
+                        )
                         // Call the failure callback if no retries are left
                         onFailure()
                     }
@@ -221,283 +275,279 @@ class AdPlacerApplication(instance: Application) {
 
 
     fun fetchApiResponse(whichResponse: TYPE_OF_RESPONSE) {
+        Logger.e("TAGCOMMON", "fetchApiResponse: Called with whichResponse=$whichResponse")
 
         initializeAndFetchFirebaseConfig(onSuccess = { firebaseConfig ->
+            Logger.i(
+                "TAGCOMMON",
+                "initializeAndFetchFirebaseConfig: onSuccess for $whichResponse"
+            )
             messagingCallback?.gotFirebaseResponse(firebaseConfig)
 
-
             if (whichResponse == TYPE_OF_RESPONSE.GOOGLE) {
-                var response = firebaseConfig.getString(whichResponse.value)
-                var apiResponse: ApiResponse = Gson().fromJson(response)
-                Log.e("TAGCOMMON", "onResponse: GOOGLE  ")
-                onSuccessfulResponse(apiResponse)
+                val response = firebaseConfig.getString(whichResponse.value)
+                val apiResponse: ApiResponse = Gson().fromJson(response)
+                Logger.e("TAGCOMMON", "onResponse: GOOGLE response fetched")
+                handleSuccessfulApiResponse(apiResponse)
             } else {
                 LIBRARY_PACKAGE_NAME = firebaseConfig.getString("LIBRARY_PACKAGE_NAME")
                 AuthorizationADS = firebaseConfig.getString("AuthorizationADS")
-                AdApiClient.BASE_URL_API = firebaseConfig.getString("BaseUrl")
-
+                BASE_URL_API = firebaseConfig.getString("BaseUrl")
+                Logger.i("TAGCOMMON", "BASE_URL_API: $BASE_URL_API")
+                Logger.i("TAGCOMMON", "AuthorizationADS: $AuthorizationADS")
+                Logger.i("TAGCOMMON", "LIBRARY_PACKAGE_NAME: $LIBRARY_PACKAGE_NAME")
 
                 val jsonBody = JSONObject().apply {
                     put("appid", LIBRARY_PACKAGE_NAME)
                     put("secretKey", AuthorizationADS)
                 }
-
                 val requestBody = jsonBody.toString()
                     .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+                Logger.e("TAGCOMMON", "Request body created: $jsonBody")
 
                 val call = AdApiClient().client.create(ApiInterface::class.java).getAll(requestBody)
-
                 call?.enqueue(object : Callback<ApiResponse?> {
                     override fun onResponse(
                         call: Call<ApiResponse?>,
                         response: Response<ApiResponse?>
                     ) {
+                        Logger.i("TAGCOMMON", "onResponse: ${response.body()}")
+
                         if (response.isSuccessful && response.body() != null) {
-                            Log.e("TAGCOMMON", "onResponse: API  ")
-                            onSuccessfulResponse(response.body()!!)
+                            Logger.e("TAGCOMMON", "onResponse: API response successful")
+                            handleSuccessfulApiResponse(response.body()!!)
+                        } else {
+                            Logger.e("TAGCOMMON", "onResponse: API response unsuccessful")
+                            onFailureResponse()
                         }
                     }
 
                     override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
-                        onFailureResponse(t)
+                        Logger.i("TAGCOMMON", "onFailure: ${t.message}")
+                        onFailureResponse()
                     }
                 })
             }
-
-
         }, onFailure = {
+            Logger.e("TAGCOMMON", "initializeAndFetchFirebaseConfig: onFailure")
             messagingCallback?.exitTheApplication()
         },
             retries = 3,
             retryDelay = 2000
         )
-
-
     }
 
-    private fun onFailureResponse(t: Throwable) {
-        Logger.i("TAGCOMMON", "onFailure: ${t.message}")
-        startTimerForAdStatus(2000)
+    private fun onFailureResponse() {
+        startAdStatusTimer(2000)
         checkAndShowAdIfAvailable()
     }
 
-    private fun onSuccessfulResponse(response: ApiResponse) {
+    private fun handleSuccessfulApiResponse(response: ApiResponse) {
         Logger.i(
             "TAGCOMMON",
-            "got response: ${response.appDetails.appName}  adStatus :   ${response.appDetails.adStatus}"
+            "Received response: App Name = ${response.appDetails.appName}, Ad Status = ${response.appDetails.adStatus}"
         )
         try {
-            runningActivity?.let { OneSignal.initWithContext(it, response.appDetails.oneSignalAppId) }
-
-
             val currentVersion = getCurrentAppVersion(runningActivity)
-            val shouldForceUpdate = response.appDetails.forceUpdateVersions.contains(currentVersion)
-            val shouldUpdate = response.appDetails.updateRequiredVersions.contains(currentVersion)
+            val requiresForceUpdate =
+                response.appDetails.forceUpdateVersions.contains(currentVersion)
+            val requiresUpdate = response.appDetails.updateRequiredVersions.contains(currentVersion)
 
-            if (shouldForceUpdate || shouldUpdate) {
+            if (requiresForceUpdate || requiresUpdate) {
                 try {
                     handler.removeCallbacksAndMessages(null)
-                    Logger.d("runnable2", "Removed callbacks and messages from handler")
+                    Logger.d("UpdateHandler", "Removed all callbacks and messages from handler")
                 } catch (e: Exception) {
-                    e.printStackTrace()
                     Logger.e(
-                        "runnable2",
-                        "Exception while removing callbacks and messages from handler: ${e.message}"
+                        "UpdateHandler",
+                        "Exception removing callbacks and messages: ${e.message}"
                     )
                 }
-                checkAndShowInternetDialog(
+                promptForUpdate(
                     activity = runningActivity,
                     title = "Update Required",
                     description = "Please update the app to the latest version.",
                     negativeButtonText = "Later",
                     positiveButtonText = "Update",
-                    callback = object : DialogCallBack {
-                        override fun onPositiveClicked(dialog: Dialog) {
-                            val appPackageName = runningActivity?.packageName
-                            Logger.e(
-                                "checkAndShowInternetDialog",
-                                "onPositiveClicked: ${"https://play.google.com/store/apps/details?id=$appPackageName"}"
-                            )
-                            GlobalUtils().openLinkInBrowser(
-                                runningActivity!!,
-                                "https://play.google.com/store/apps/details?id=$appPackageName"
-                            )
-                        }
-
-                        override fun onNegativeClicked(dialog: Dialog) {
-                            Logger.e("checkAndShowInternetDialog", "onNegativeClicked")
-
-                            if (shouldUpdate) {
-                                dialog.dismiss()
-                                sharedPrefConfig.apiResponse = response
-                                startTimerForAdStatus(0)
-                                checkAndShowAdIfAvailable()
-                            }
-
-                        }
-
-                        override fun onDialogCancelled() {
-                            Logger.e("checkAndShowInternetDialog", "onDialogCancelled")
-
-                            sharedPrefConfig.apiResponse = response
-                            startTimerForAdStatus(0)
-                            checkAndShowAdIfAvailable()
-                        }
-
-                        override fun onDialogDismissed() {
-                            Logger.e("checkAndShowInternetDialog", "onDialogDismissed")
-
-                            sharedPrefConfig.apiResponse = response
-                            startTimerForAdStatus(0)
-                            checkAndShowAdIfAvailable()
-                        }
-                    },
-                    updateRequiredVersions = response.appDetails.updateRequiredVersions,
-                    forceUpdateVersions = response.appDetails.forceUpdateVersions
+                    response = response,
+                    requiresUpdate = requiresUpdate
                 )
             } else {
-                sharedPrefConfig.apiResponse = response
-                startTimerForAdStatus(2000)
+                saveApiResponse(response)
+                startAdStatusTimer(delayMillis = 2000)
                 checkAndShowAdIfAvailable()
             }
-
         } catch (e: Exception) {
-            startTimerForAdStatus(2000)
+            Logger.e("TAGCOMMON", "Exception handling API response: ${e.message}")
+            startAdStatusTimer(delayMillis = 2000)
             checkAndShowAdIfAvailable()
         }
     }
 
-
-    fun checkAndShowInternetDialog(
+    private fun promptForUpdate(
         activity: Activity?,
-        title: String?,
-        description: String?,
-        negativeButtonText: String?,
-        positiveButtonText: String?,
-        callback: DialogCallBack,
-        updateRequiredVersions: List<String>,
-        forceUpdateVersions: List<String>
+        title: String,
+        description: String,
+        negativeButtonText: String,
+        positiveButtonText: String,
+        response: ApiResponse,
+        requiresUpdate: Boolean
     ) {
-        val currentVersion = getCurrentAppVersion(activity)
+        val dialogCallback = object : DialogCallBack {
+            override fun onPositiveClicked(dialog: Dialog) {
+                val appPackageName = activity?.packageName
+                Logger.e(
+                    "UpdateDialog",
+                    "User accepted update: https://play.google.com/store/apps/details?id=$appPackageName"
+                )
+                GlobalUtils().openLinkInBrowser(
+                    activity!!,
+                    "https://play.google.com/store/apps/details?id=$appPackageName"
+                )
+            }
 
-        val shouldForceUpdate = forceUpdateVersions.contains(currentVersion)
-        val shouldUpdate = updateRequiredVersions.contains(currentVersion)
+            override fun onNegativeClicked(dialog: Dialog) {
+                Logger.e("UpdateDialog", "User deferred update")
+                handleDialogDismissOrCancel(response, requiresUpdate)
+            }
 
-        if (shouldForceUpdate || shouldUpdate) {
-            val isCancelable = !shouldForceUpdate
+            override fun onDialogCancelled() {
+                Logger.e("UpdateDialog", "Update dialog cancelled")
+                handleDialogDismissOrCancel(response, requiresUpdate)
+            }
 
-            showCommonDialog(
-                activity = activity,
-                title = title,
-                description = description,
-                negativeButtonText = negativeButtonText,
-                positiveButtonText = positiveButtonText,
-                isCancelable = isCancelable,
-                callback = callback
-            )
-        } else {
-            Logger.e("checkAndShowInternetDialog", "Current version does not require an update.")
+            override fun onDialogDismissed() {
+                Logger.e("UpdateDialog", "Update dialog dismissed")
+                handleDialogDismissOrCancel(response, requiresUpdate)
+            }
         }
+
+        val currentVersion = getCurrentAppVersion(activity)
+        val forceUpdateRequired = response.appDetails.forceUpdateVersions.contains(currentVersion)
+        val isCancelable = !forceUpdateRequired
+
+        showCommonDialog(
+            activity = activity,
+            title = title,
+            description = description,
+            negativeButtonText = negativeButtonText,
+            positiveButtonText = positiveButtonText,
+            isCancelable = isCancelable,
+            callback = dialogCallback
+        )
+    }
+
+    private fun handleDialogDismissOrCancel(response: ApiResponse, requiresUpdate: Boolean) {
+        if (requiresUpdate) {
+            saveApiResponse(response)
+            startAdStatusTimer(delayMillis = 0)
+            checkAndShowAdIfAvailable()
+        }
+    }
+
+    private fun saveApiResponse(response: ApiResponse) {
+        sharedPrefConfig.apiResponse = response
     }
 
 
     private fun checkAndShowAdIfAvailable() {
         Logger.d(
-            "checkAndShowAdIfAvailable",
-            "Initialized global preferences ${runningActivity?.let { sharedPrefConfig.appDetails.adStatus }}"
+            "AdCheck",
+            "Initializing global preferences with ad status: ${runningActivity?.let { sharedPrefConfig.appDetails.adStatus }}"
         )
 
-
         initClickCounts()
-        Logger.d("checkAndShowAdIfAvailable", "Initialized click counts")
+        Logger.d("AdCheck", "Click counts initialized")
 
         if (isAdStatusOn()) {
-            Logger.d("checkAndShowAdIfAvailable", "Ad status is ON")
+            Logger.d("AdCheck", "Ad status is ON")
 
-            if (!GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)) {
-                Logger.d(
-                    "checkAndShowAdIfAvailable",
-                    "Network is not available, showing network dialog"
-                )
-                showInteretDialog()
-            } else {
-                Logger.d(
-                    "checkAndShowAdIfAvailable",
-                    "Network is available, showing app open ad and preloading interstitial and native ads"
-                )
-                showAppOpen()
-                interstitialManager.preloadInterAd(runningActivity!!)
-                nativeAdManager.loadNativeAd(runningActivity!!)
+            runningActivity?.let {
+                if (!GlobalUtils().isNetworkAvailable(it)) {
+                    Logger.d("AdCheck", "Network is not available, showing network dialog")
+                    showInternetDialog()
+                } else {
+                    Logger.d(
+                        "AdCheck",
+                        "Network is available, showing app open ad and preloading interstitial and native ads"
+                    )
+                    showAppOpenAd()
+                    if(preLoadInterstitial){
+                        interstitialManager.preloadInterstitialAd(runningActivity!!)
+                    }
+                    if(preLoadNative){
+                        nativeAdManager.loadNativeAd(runningActivity!!)
+                    }
+                    if(preLoadReward){
+                        rewardClass.preloadRewardAd(runningActivity!!)
+                    }
+
+                }
             }
+
         } else {
-            Logger.d("checkAndShowAdIfAvailable", "Ad status is OFF")
+            Logger.d("AdCheck", "Ad status is OFF")
 
             if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
                 Logger.d(
-                    "checkAndShowAdIfAvailable",
-                    "Ad is not showing, removing callbacks and continuing app flow"
+                    "AdCheck",
+                    "No ad is currently showing, removing callbacks and continuing app flow"
                 )
 
-                try {
-                    handler2.removeCallbacksAndMessages(null)
-                    handler2.removeCallbacks(runnable2)
-                    Logger.d(
-                        "checkAndShowAdIfAvailable",
-                        "Removed callbacks and messages from handler2"
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Logger.e(
-                        "checkAndShowAdIfAvailable",
-                        "Exception while removing callbacks and messages from handler2: ${e.message}"
-                    )
-                }
-
-                try {
-                    handler.removeCallbacksAndMessages(null)
-                    handler.removeCallbacks(runnable)
-                    Logger.d(
-                        "checkAndShowAdIfAvailable",
-                        "Removed callbacks and messages from handler"
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Logger.e(
-                        "checkAndShowAdIfAvailable",
-                        "Exception while removing callbacks and messages from handler: ${e.message}"
-                    )
-                }
+                removeCallbacks(handler2, runnable2, "Handler2")
+                removeCallbacks(handler, runnable, "Handler")
 
                 continueAppFlow()
             } else {
-                Logger.d("checkAndShowAdIfAvailable", "Ad is currently showing, no action taken")
+                Logger.d("AdCheck", "Ad is currently showing, no action taken")
             }
+        }
+    }
+
+    private fun removeCallbacks(handler: Handler, runnable: Runnable, handlerName: String) {
+        try {
+            handler.removeCallbacksAndMessages(null)
+            handler.removeCallbacks(runnable)
+            Logger.d("AdCheck", "Removed callbacks and messages from $handlerName")
+        } catch (e: Exception) {
+            Logger.e(
+                "AdCheck",
+                "Exception while removing callbacks and messages from $handlerName: ${e.message}"
+            )
         }
     }
 
 
     var handler: Handler = Handler(Looper.getMainLooper())
+
     var runnable: Runnable = Runnable {
         try {
             handler.removeCallbacksAndMessages(null)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e("HandlerRunnable", "Error while removing callbacks: ${e.message}")
         }
 
-
         if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing && isSplashRunning) {
-            if (!GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)) {
-                if (sharedPrefConfig.appDetails.adStatus.trim { it <= ' ' } == "1"
-                ) {
-                    showInteretDialog()
+            val isNetworkAvailable = GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)
+            val adStatus = sharedPrefConfig.appDetails.adStatus.trim()
+
+            if (!isNetworkAvailable) {
+                Logger.d("HandlerRunnable", "Network is not available")
+
+                if (adStatus == STATUS.ON.name) {
+                    Logger.d("HandlerRunnable", "Ad status is ON, showing internet dialog")
+                    showInternetDialog()
                 } else {
+                    Logger.d("HandlerRunnable", "Ad status is OFF, continuing app flow")
                     continueAppFlow()
                 }
             } else {
+                Logger.d("HandlerRunnable", "Network is available, continuing app flow")
                 continueAppFlow()
             }
         }
     }
+
 
 
     var commonDialog: Dialog? = null
@@ -575,8 +625,14 @@ class AdPlacerApplication(instance: Application) {
         }
     }
 
-    fun showOneSignalNotificationPrompt(){
-        CoroutineScope(Dispatchers.IO).launch {
+    fun showOneSignalNotificationPrompt() {
+        runningActivity?.let {
+            OneSignal.initWithContext(
+                it,
+                sharedPrefConfig.appDetails.oneSignalAppId
+            )
+        }
+        CoroutineScope(Dispatchers.Main).launch {
             OneSignal.Notifications.requestPermission(false)
         }
     }
@@ -592,77 +648,59 @@ class AdPlacerApplication(instance: Application) {
     }
 
     var handler2: Handler = Handler(Looper.getMainLooper())
+
     var runnable2: Runnable = Runnable {
         try {
             handler2.removeCallbacksAndMessages(null)
-            Logger.d("runnable2", "Removed callbacks and messages from handler2")
+            Logger.d("Runnable2", "Removed callbacks and messages from handler2")
         } catch (e: Exception) {
-            e.printStackTrace()
-            Logger.e(
-                "runnable2",
-                "Exception while removing callbacks and messages from handler2: ${e.message}"
-            )
+            Logger.e("Runnable2", "Error while removing callbacks: ${e.message}")
         }
 
         if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
-            Logger.d("runnable2", "Ad is not showing")
+            Logger.d("Runnable2", "Ad is not showing")
 
-            if (!GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)) {
-                Logger.d("runnable2", "Network is not available")
+            val isNetworkAvailable = GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)
+
+            if (!isNetworkAvailable) {
+                Logger.d("Runnable2", "Network is not available")
 
                 if (isAdStatusOn()) {
-                    Logger.d("runnable2", "Ad status is ON, showing network dialog")
-                    showInteretDialog()
+                    Logger.d("Runnable2", "Ad status is ON, showing network dialog")
+                    showInternetDialog()
                 } else {
-                    Logger.d("runnable2", "Ad status is OFF, continuing app flow")
+                    Logger.d("Runnable2", "Ad status is OFF, continuing app flow")
                     continueAppFlow()
                 }
             } else {
-                Logger.d("runnable2", "Network is available")
+                Logger.d("Runnable2", "Network is available")
 
                 if (isAdStatusOn()) {
-                    Logger.d(
-                        "runnable2",
-                        "Ad status is ON, continuing app flow after removing callbacks and messages from handler"
-                    )
-
-                    try {
-                        handler.removeCallbacksAndMessages(null)
-                        Logger.d("runnable2", "Removed callbacks and messages from handler")
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Logger.e(
-                            "runnable2",
-                            "Exception while removing callbacks and messages from handler: ${e.message}"
-                        )
-                    }
-
+                    Logger.d("Runnable2", "Ad status is ON, continuing app flow after removing callbacks")
                     continueAppFlow()
                 } else {
-                    Logger.d(
-                        "runnable2",
-                        "Ad status is OFF, continuing app flow without any action"
-                    )
+                    Logger.d("Runnable2", "Ad status is OFF, continuing app flow without action")
                     continueAppFlow()
                 }
             }
         } else {
-            Logger.d("runnable2", "Ad is currently showing, no action taken")
+            Logger.d("Runnable2", "Ad is currently showing, no action taken")
         }
     }
 
 
-    private fun startTimerForAdStatus(duration: Int) {
+
+    private fun startAdStatusTimer(delayMillis: Int) {
         try {
             handler2.removeCallbacksAndMessages(null)
         } catch (e: Exception) {
             e.printStackTrace()
         }
         messagingCallback?.startingTimerToChangeScreen()
-        handler2.postDelayed(runnable2, duration.toLong())
+        handler2.postDelayed(runnable2, delayMillis.toLong())
     }
 
-    fun showInteretDialog() {
+    fun showInternetDialog() {
         if (com.harshil258.adplacer.adClass.AppOpenManager.appOpenAd != null) {
             return
         }
@@ -695,25 +733,5 @@ class AdPlacerApplication(instance: Application) {
         messagingCallback = instanceCallback
     }
 
-
-    init {
-        adPlacerApplication = this
-        homeButtonReceiver = HomeButtonReceiver()
-        val filter = IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            instance.registerReceiver(homeButtonReceiver, filter, Context.RECEIVER_EXPORTED)
-        } else {
-            instance.registerReceiver(homeButtonReceiver, filter)
-        }
-
-        MobileAds.initialize(instance) { }
-
-        appOpenManager = com.harshil258.adplacer.adClass.AppOpenManager()
-        interstitialManager = InterstitialManager()
-        rewardClass = RewardAdManager()
-        nativeAdManager = NativeAdManager()
-    }
 
 }

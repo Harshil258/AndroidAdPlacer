@@ -10,6 +10,7 @@ import android.widget.RelativeLayout
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 
 class NativeSmallView : RelativeLayout {
     private var shouldLoadDirect = false
@@ -60,8 +61,8 @@ class NativeSmallView : RelativeLayout {
 
     fun loadAd(activity: Activity?, adDisplayedCallback: AdCallback) {
         //        try {
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall: loadAd NativeSmallView ")
-        AdPlacerApplication.adPlacerApplication.nativeAdManager.showAdIfLoadedSmall(
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall: loadAd NativeSmallView ")
+        adPlacerApplication.nativeAdManager.showAdIfLoadedSmall(
             activity!!,
             rlNativeSmall!!,
             frameNativeSmall!!,
@@ -69,7 +70,7 @@ class NativeSmallView : RelativeLayout {
         )
 
         //        } catch (Exception e) {
-//            Log.e("wrhwerhwetheth", "loadAd: " + e.getMessage());
+//            Logger.e("wrhwerhwetheth", "loadAd: " + e.getMessage());
 //
 //
 //        }

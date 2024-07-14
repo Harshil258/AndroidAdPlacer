@@ -10,6 +10,7 @@ import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 
 class NativeBigView : RelativeLayout {
     private var shouldLoadDirect = false
@@ -56,7 +57,7 @@ class NativeBigView : RelativeLayout {
 
     fun loadAd(activity: Activity?, adDisplayedCallback: AdCallback) {
         try {
-            AdPlacerApplication.adPlacerApplication.nativeAdManager.showAdIfLoadedBig(
+            adPlacerApplication.nativeAdManager.showAdIfLoadedBig(
                 activity!!,
                 rlNativeBig!!,
                 frameNativebig!!,

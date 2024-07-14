@@ -18,7 +18,7 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.isAppInForeground
 
 class RewardAdManager {
     var TAG: String = "Interstitial"
@@ -28,9 +28,7 @@ class RewardAdManager {
         try {
             val appDetail = sharedPrefConfig.appDetails
             if (!isRewardEmpty()) {
-                if (appDetail.rewardAdFrequency.isEmpty() || appDetail.rewardAdFrequency.equals(
-                        ""
-                    ) || !TextUtils.isDigitsOnly(appDetail.rewardAdFrequency)
+                if (appDetail.rewardAdFrequency.isEmpty() || appDetail.rewardAdFrequency == "" || !TextUtils.isDigitsOnly(appDetail.rewardAdFrequency)
                 ) {
                     counter = 3
                 } else {
@@ -58,11 +56,11 @@ class RewardAdManager {
     }
 
     fun loadAndShowReward(activity: Activity, callBack: RewardAdCallBack) {
-        AdPlacerApplication.isAppInForeground = true
+        isAppInForeground = true
         if (checkMultipleClick2(2500)) {
             return
         }
-        if (com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
+        if (AppOpenManager.isAdShowing) {
             return
         }
         if (isAdLoading) {
@@ -78,11 +76,11 @@ class RewardAdManager {
         }
         if (mRewardAd != null) {
             isAdLoading = false
-            if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
+            if (!AppOpenManager.isAdShowing) {
                 if (isCounterSatisfy(activity)) {
                     startTimerForContinueFlow(activity, 5000, callBack)
                 } else {
-                    if (AdPlacerApplication.isAppInForeground) {
+                    if (isAppInForeground) {
                         callBack.onContinueFlow()
                     }
                 }
@@ -104,13 +102,13 @@ class RewardAdManager {
             }
             return
         }
-        if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
+        if (!AppOpenManager.isAdShowing) {
             if (isCounterSatisfy(activity)) {
                 loadRewardAd(activity, callBack)
                 showLoadingDialog(activity, callBack)
                 startTimerForContinueFlow(activity, 5000, callBack)
             } else {
-                if (AdPlacerApplication.isAppInForeground) {
+                if (isAppInForeground) {
                     callBack.onAdNotAvailable(dialog)
                 }
             }
@@ -132,7 +130,7 @@ class RewardAdManager {
 
 
                 if (callBack != null) {
-                    if (AdPlacerApplication.isAppInForeground) {
+                    if (isAppInForeground) {
                     }
                 }
             }
@@ -144,7 +142,7 @@ class RewardAdManager {
         })
     }
 
-    fun PreloadRewardAd(activity: Activity) {
+    fun preloadRewardAd(activity: Activity) {
         if (isAdLoading || isAdShowing) {
             stopLoadingdialog()
             return
@@ -189,11 +187,11 @@ class RewardAdManager {
     ) {
         timer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 1000L) {
             override fun onTick(millisUntilFinished: Long) {
-                if (com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing || !AdPlacerApplication.isAppInForeground) {
+                if (AppOpenManager.isAdShowing || !isAppInForeground) {
                     timer!!.pause()
                     stopLoadingdialog()
-                } else if (AdPlacerApplication.isAppInForeground && mRewardAd != null && !isAdLoading) {
-                    if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
+                } else if (isAppInForeground && mRewardAd != null && !isAdLoading) {
+                    if (!AppOpenManager.isAdShowing) {
                         showRewardAd(activity, callBack)
                     }
                     timer!!.pause()
@@ -202,7 +200,7 @@ class RewardAdManager {
             }
 
             override fun onFinish() {
-                if (!com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing) {
+                if (!AppOpenManager.isAdShowing) {
                     callBack.onAdNotAvailable(dialog)
                 }
             }
@@ -273,7 +271,7 @@ class RewardAdManager {
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 isAdShowing = false
                 mRewardAd = null
-                if (AdPlacerApplication.isAppInForeground) {
+                if (isAppInForeground) {
                     callBack.onContinueFlow()
                 }
             }

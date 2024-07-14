@@ -8,6 +8,7 @@ import android.widget.RelativeLayout
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 
 class NativeBigOrSmallView : RelativeLayout {
     private var shouldLoadDirect = false
@@ -59,7 +60,7 @@ class NativeBigOrSmallView : RelativeLayout {
     ) {
 
         try {
-            AdPlacerApplication.adPlacerApplication.nativeAdManager.callBigOrSmall(
+            adPlacerApplication.nativeAdManager.callBigOrSmall(
                 activity!!,
                 myAdViewBig!!,
                 myAdViewSmall!!,

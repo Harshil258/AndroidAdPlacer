@@ -11,19 +11,18 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
+import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import java.util.Date
 
 class AppOpenManager {
     private var appOpenAdLoadCallback: AppOpenAdLoadCallback? = null
     fun showAppOpen(activity: Activity, callBack: AdCallback) {
         if (!isAppOpenEmpty()) {
-            if (isAdAvailable || com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing) {
-                if (!com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing) {
+            if (isAdAvailable || isAdShowing) {
+                if (!isAdShowing) {
                     isAdShowing = true
                     appOpenAd!!.fullScreenContentCallback = object : FullScreenContentCallback() {
-                        override fun onAdClicked() {
-                            super.onAdClicked()
-                        }
 
                         override fun onAdDismissedFullScreenContent() {
                             appOpenAd = null
@@ -36,46 +35,42 @@ class AppOpenManager {
                             isAdShowing = false
                         }
 
-                        override fun onAdImpression() {
-                            super.onAdImpression()
-                        }
-
                         override fun onAdShowedFullScreenContent() {
                             isAdShowing = true
                             try {
-                                AdPlacerApplication.adPlacerApplication.messagingCallback!!.hideSplashLoader()
+                                adPlacerApplication.messagingCallback!!.hideSplashLoader()
                             } catch (e: Exception) {
                             }
                         }
                     }
-                    com.harshil258.adplacer.adClass.AppOpenManager.Companion.appOpenAd!!.show(activity)
+                    appOpenAd!!.show(activity)
                 }
             } else {
                 loadAppOpen(activity, callBack)
             }
         } else {
-            com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdShowing = false
+            isAdShowing = false
         }
     }
 
     private fun loadAppOpen(activity: Activity, callBack: AdCallback) {
-        if (com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdLoading) {
+        if (isAdLoading) {
             return
         }
         if (isAppOpenEmpty()) {
             return
         }
 
-        if (com.harshil258.adplacer.adClass.AppOpenManager.Companion.appOpenAd != null) {
+        if (appOpenAd != null) {
             return
         }
         appOpenAdLoadCallback = object : AppOpenAdLoadCallback() {
             override fun onAdLoaded(ad: AppOpenAd) {
-                com.harshil258.adplacer.adClass.AppOpenManager.Companion.appOpenAd = ad
-                com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdLoading = false
-                com.harshil258.adplacer.adClass.AppOpenManager.Companion.loadTime = Date().time
+                appOpenAd = ad
+                isAdLoading = false
+                loadTime = Date().time
 
-                if (AdPlacerApplication.isSplashRunning) showAppOpen(activity, callBack)
+                if (isSplashRunning) showAppOpen(activity, callBack)
             }
 
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -94,18 +89,18 @@ class AppOpenManager {
                 )
             }
 
-            com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdLoading = true
+            isAdLoading = true
         } catch (e: Exception) {
-            com.harshil258.adplacer.adClass.AppOpenManager.Companion.isAdLoading = false
+            isAdLoading = false
         }
     }
 
 
     val isAdAvailable: Boolean
-        get() = com.harshil258.adplacer.adClass.AppOpenManager.Companion.appOpenAd != null && wasLoadTimeLessThanNHoursAgo(4)
+        get() = appOpenAd != null && wasLoadTimeLessThanNHoursAgo(4)
 
     private fun wasLoadTimeLessThanNHoursAgo(numHours: Long): Boolean {
-        val dateDifference = Date().time - com.harshil258.adplacer.adClass.AppOpenManager.Companion.loadTime
+        val dateDifference = Date().time - loadTime
         val numMilliSecondsPerHour: Long = 3600000
         return (dateDifference < (numMilliSecondsPerHour * numHours))
     }

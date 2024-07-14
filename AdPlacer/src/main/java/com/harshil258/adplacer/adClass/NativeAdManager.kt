@@ -29,6 +29,8 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
+import com.harshil258.adplacer.utils.Logger
 import java.util.Random
 
 class NativeAdManager {
@@ -59,13 +61,13 @@ class NativeAdManager {
             .forNativeAd { nativeAd ->
                 isAdLoading = false
                 Companion.nativeAd = nativeAd
-                Log.e("NATIVELOADIMPRESSION", "LOADED")
+                Logger.e("NATIVELOADIMPRESSION", "LOADED")
 
             }
             .withAdListener(object : AdListener() {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
                     isAdLoading = false
-                    Log.e(
+                    Logger.e(
                         "NATIVELOADIMPRESSION",
                         "ERROR ${adError.message}   ${sharedPrefConfig.appDetails.admobNativeAd}"
                     )
@@ -74,7 +76,7 @@ class NativeAdManager {
 
                 override fun onAdImpression() {
                     super.onAdImpression()
-                    Log.e("NATIVELOADIMPRESSION", "IMPRESSION")
+                    Logger.e("NATIVELOADIMPRESSION", "IMPRESSION")
 
                 }
             })
@@ -90,13 +92,13 @@ class NativeAdManager {
         NATIVESIZE: NATIVE_SIZE,
         adDisplayedCallback: AdCallback
     ) {
-        Log.e("NATIVEADSSS", "loadNativeAdAndShow: 1")
+        Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 1")
 
         if (isNativeStatusNull()) {
             rlNative.visibility = View.GONE
             return
         }
-        Log.e("NATIVEADSSS", "loadNativeAdAndShow: 2")
+        Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 2")
 
         nativeAd?.apply {
             rlNative.visibility = View.VISIBLE
@@ -110,7 +112,7 @@ class NativeAdManager {
             )
             return
         }
-        Log.e("NATIVEADSSS", "loadNativeAdAndShow: 3")
+        Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 3")
 
         if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) return
 
@@ -119,8 +121,8 @@ class NativeAdManager {
             sharedPrefConfig.appDetails.admobNativeAd
         )
             .forNativeAd { nativeAd ->
-                Log.e("NATIVEADSSS", "loadNativeAdAndShow: 4 Loaded")
-                Log.e("NATIVELOADIMPRESSION", "LOADED")
+                Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 4 Loaded")
+                Logger.e("NATIVELOADIMPRESSION", "LOADED")
                 rlNative.visibility = View.VISIBLE
                 populateNativeAdView(
                     activity,
@@ -133,9 +135,9 @@ class NativeAdManager {
             }
             .withAdListener(object : AdListener() {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
-                    Log.e("NATIVEADSSS", "loadNativeAdAndShow: 4 failed  ${adError.message}")
+                    Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 4 failed  ${adError.message}")
                     rlNative.visibility = View.GONE
-                    Log.e(
+                    Logger.e(
                         "NATIVELOADIMPRESSION",
                         "FAILED    ${adError.message}  ${sharedPrefConfig.appDetails.admobNativeAd}"
                     )
@@ -145,13 +147,13 @@ class NativeAdManager {
 
                 override fun onAdImpression() {
                     super.onAdImpression()
-                    Log.e("NATIVELOADIMPRESSION", "IMPRESSION")
+                    Logger.e("NATIVELOADIMPRESSION", "IMPRESSION")
 
                 }
             })
             .withNativeAdOptions(NativeAdOptions.Builder().build())
             .build()
-        Log.e("NATIVEADSSS", "loadNativeAdAndShow: 5")
+        Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 5")
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
@@ -161,13 +163,13 @@ class NativeAdManager {
         frameLayoutSmall: FrameLayout,
         adDisplayedCallback: AdCallback
     ) {
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall: 1")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall: 1")
         if (isNativeStatusNull()) {
             rlNativeSmall.visibility = View.GONE
             return
         }
 
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  2")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  2")
         val NATIVESIZE = NATIVE_SIZE.SMALL
         rlNativeSmall.visibility = View.INVISIBLE
 
@@ -181,7 +183,7 @@ class NativeAdManager {
             )
             return
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  3")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  3")
         nativeAd?.apply {
             rlNativeSmall.visibility = View.VISIBLE
             populateNativeAdView(
@@ -194,13 +196,13 @@ class NativeAdManager {
             )
             return
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  4")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  4")
 
         if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) {
             rlNativeSmall.visibility = View.GONE
             return
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  5")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  5")
 
         loadNativeAdAndShow(
             activity,
@@ -209,9 +211,9 @@ class NativeAdManager {
             NATIVESIZE,
             adDisplayedCallback
         )
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  6")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  6")
         rlNativeSmall.visibility = View.VISIBLE
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  7")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  7")
         nativeAd?.let {
             populateNativeAdView(
                 activity,
@@ -222,7 +224,7 @@ class NativeAdManager {
                 adDisplayedCallback
             )
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedSmall:  8")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedSmall:  8")
     }
 
     fun showAdIfLoadedBig(
@@ -232,13 +234,13 @@ class NativeAdManager {
         adDisplayedCallback: AdCallback
     ) {
 
-        Log.e("NATIVEADSSS", "showAdIfLoadedBig: 1")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedBig: 1")
 
         if (isNativeStatusNull()) {
             rlNativeBig.visibility = View.GONE
             return
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedBig: 2")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedBig: 2")
 
         val NATIVESIZE = NATIVE_SIZE.LARGE
         rlNativeBig.visibility = View.INVISIBLE
@@ -253,7 +255,7 @@ class NativeAdManager {
             )
             return
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedBig: 3")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedBig: 3")
 
         nativeAd?.apply {
             rlNativeBig.visibility = View.VISIBLE
@@ -272,11 +274,11 @@ class NativeAdManager {
             rlNativeBig.visibility = View.GONE
             return
         }
-        Log.e("NATIVEADSSS", "showAdIfLoadedBig: 4")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedBig: 4")
 
         loadNativeAdAndShow(activity, rlNativeBig, frameLayoutBig, NATIVESIZE, adDisplayedCallback)
         rlNativeBig.visibility = View.VISIBLE
-        Log.e("NATIVEADSSS", "showAdIfLoadedBig: 5")
+        Logger.e("NATIVEADSSS", "showAdIfLoadedBig: 5")
 
         nativeAd?.apply {
             populateNativeAdView(
@@ -415,7 +417,7 @@ class NativeAdManager {
                 }
             }
 //            if (NATIVESIZE == NATIVE_SIZE.LARGE || NATIVESIZE == NATIVE_SIZE.MEDIUM) {
-            Log.e("NATIVESIZE", "populateNativeAdView: NATIVESIZE  ${NATIVESIZE}")
+            Logger.e("NATIVESIZE", "populateNativeAdView: NATIVESIZE  ${NATIVESIZE}")
             findViewById<MediaView>(R.id.mediaView)?.apply {
                 nativeAd.mediaContent?.let {
                     mediaContent = it
@@ -471,7 +473,7 @@ class NativeAdManager {
         Log.w("NATIVEADSSS", "populateNativeAdView: 5")
         if (!isOnDemand) {
             Companion.nativeAd = null
-            if (AdPlacerApplication.adPlacerApplication.messagingCallback?.isExitActivity != true) {
+            if (adPlacerApplication.messagingCallback?.isExitActivity != true) {
                 loadNativeAd(activity)
             }
         }

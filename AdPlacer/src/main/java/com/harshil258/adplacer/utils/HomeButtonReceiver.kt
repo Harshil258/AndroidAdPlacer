@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants.adPlacerApplication
+import com.harshil258.adplacer.utils.Constants.isAppInForeground
 
 class HomeButtonReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -13,7 +15,7 @@ class HomeButtonReceiver : BroadcastReceiver() {
             val reason = intent.getStringExtra("reason")
 
             if (reason != null && (reason == "homekey" || reason == "recentapps")) {
-                AdPlacerApplication.isAppInForeground = false
+                isAppInForeground = false
                 try {
                     if (InterstitialManager.timer != null) {
                         InterstitialManager.timer!!.pause()
@@ -22,7 +24,7 @@ class HomeButtonReceiver : BroadcastReceiver() {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                AdPlacerApplication.adPlacerApplication.interstitialManager.stopLoadingdialog()
+                adPlacerApplication.interstitialManager.stopLoadingdialog()
             }
         }
     }

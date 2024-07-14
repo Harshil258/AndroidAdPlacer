@@ -9,7 +9,7 @@ interface MessagingCallback {
     fun openStartActivity()
     fun openHomeActivity()
     fun openHowToUseActivity()
-    fun openExtraaStartActivity()
+    fun openExtraStartActivity()
     fun exitTheApplication()
     fun showNetworkDialog()
     fun gotFirebaseResponse(firebaseConfig: FirebaseRemoteConfig)
