@@ -107,6 +107,7 @@ class AdPlacerApplication(instance: Application) {
     }
 
 
+
     fun showAppOpenAd() {
         if (InterstitialManager.isAdShowing) {
             return
