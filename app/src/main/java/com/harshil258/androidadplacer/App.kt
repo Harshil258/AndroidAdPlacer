@@ -258,13 +258,13 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
     override fun gotFirebaseResponse(firebaseRemoteConfig: FirebaseRemoteConfig) {
-        sharedPrefConfig.appDetails.admobNativeAd = "/6499/example/native-video"
+//        sharedPrefConfig.appDetails.admobNativeAd = "/6499/example/native-video"
 
 
     }
 
     override fun startingTimerToChangeScreen() {
-        sharedPrefConfig.appDetails = sharedPrefConfig.appDetails.copy(adStatus = "OFF")
+//        sharedPrefConfig.appDetails = sharedPrefConfig.appDetails.copy(adStatus = "OFF")
 
     }
 

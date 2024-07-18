@@ -59,7 +59,7 @@ class BannerView : RelativeLayout {
             rlBanner!!,
             frameBanner!!,
             rlLoader!!,
-            AdSize.BANNER
+            AdSize.SMART_BANNER
         )
     }
 }

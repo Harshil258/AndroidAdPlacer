@@ -638,6 +638,12 @@ class AdPlacerApplication(instance: Application) {
         }
     }
 
+    fun subscribeToTheTopic(tag : String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            OneSignal.User.addTag("topic", tag)
+        }
+    }
+
 
     fun startTimerForContinueFlow(duration: Int) {
         try {

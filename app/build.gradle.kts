@@ -51,6 +51,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
 
-//    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.30")
+//    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.39")
 
 }

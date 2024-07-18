@@ -7,7 +7,7 @@
     <RelativeLayout
         android:id="@+id/rlBanner"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="90dp"
         android:layout_margin="@dimen/_4sdp"
         android:background="@drawable/bg_corner_10"
         android:backgroundTint="@color/white"
