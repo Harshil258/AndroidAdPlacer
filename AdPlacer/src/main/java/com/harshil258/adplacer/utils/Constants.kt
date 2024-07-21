@@ -24,4 +24,6 @@ object Constants {
     var preLoadNative = true
     var preLoadReward = false
 
+    var wantToByPassResponse = true
+
 }
