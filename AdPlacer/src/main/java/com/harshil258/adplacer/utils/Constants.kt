@@ -19,7 +19,6 @@ object Constants {
     var isSplashRunning: Boolean = false
     var shouldGoWithoutInternet = false
 
-
     var preLoadInterstitial = true
     var preLoadNative = true
     var preLoadReward = false
