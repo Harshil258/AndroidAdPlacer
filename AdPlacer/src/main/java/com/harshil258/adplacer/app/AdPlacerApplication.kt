@@ -285,8 +285,6 @@ class AdPlacerApplication(instance: Application) {
             startTimerForContinueFlow(delayMillis = 0)
         }
 
-
-
         initializeAndFetchFirebaseConfig(onSuccess = { firebaseConfig ->
             Logger.i(
                 "TAGCOMMON",
