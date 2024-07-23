@@ -121,7 +121,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 return
             } else {
                 Logger.i("srherhse", "apiResponse called")
-                var type = TYPE_OF_RESPONSE.GOOGLE
+                var type = TYPE_OF_RESPONSE.API
                 type.value = "APPDETAILS12"
                 adPlacerApplication?.fetchApiResponse(type)
                 adPlacerApplication?.startTimerForContinueFlow(12000)

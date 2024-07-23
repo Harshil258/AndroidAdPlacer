@@ -661,8 +661,6 @@ class AdPlacerApplication(instance: Application) {
         messagingCallback?.startingTimerToChangeScreen()
         if (wantToByPassResponse && sharedPrefConfig.isResponseGot) {
             handler.postDelayed(runnable, 0)
-        } else {
-            handler.postDelayed(runnable, delayMillis.toLong())
         }
 
     }
