@@ -649,7 +649,6 @@ class AdPlacerApplication(instance: Application) {
         }
     }
 
-
     fun startTimerForContinueFlow(delayMillis: Int) {
         try {
             handler.removeCallbacksAndMessages(null)
