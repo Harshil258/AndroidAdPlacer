@@ -6,7 +6,7 @@ import com.harshil258.adplacer.app.AdPlacerApplication
 
 @SuppressLint("StaticFieldLeak")
 object Constants {
-
+    @Volatile
     lateinit var adPlacerApplication: AdPlacerApplication
     var runningActivity: Activity? = null
 

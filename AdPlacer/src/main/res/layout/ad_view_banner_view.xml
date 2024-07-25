@@ -27,7 +27,7 @@
                 android:id="@+id/lottieBanner"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/txtTitle"
+                android:layout_above="@+id/dialogTitle"
                 android:layout_alignParentTop="true"
                 android:layout_centerInParent="true"
                 android:layout_marginBottom="@dimen/_5sdp"
@@ -39,7 +39,7 @@
                 app:tint="@color/black" />
 
             <TextView
-                android:id="@+id/txtTitle"
+                android:id="@+id/dialogTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"

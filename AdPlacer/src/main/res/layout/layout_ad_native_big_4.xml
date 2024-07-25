@@ -135,7 +135,7 @@
                         <TextView
                             android:alpha="0.7"
                             android:ellipsize="marquee"
-                            android:id="@+id/txtDescription"
+                            android:id="@+id/dialogDescription"
                             android:layout_height="wrap_content"
                             android:layout_width="match_parent"
                             android:maxLines="1"

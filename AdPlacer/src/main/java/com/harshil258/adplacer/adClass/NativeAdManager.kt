@@ -28,7 +28,6 @@ import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
-import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.Logger
 import java.util.Random
@@ -398,7 +397,7 @@ class NativeAdManager {
                     nativeAdView.headlineView = this
                 }
             }
-            findViewById<TextView>(R.id.txtDescription)?.apply {
+            findViewById<TextView>(R.id.dialogDescription)?.apply {
                 nativeAd.body?.let {
                     text = it
                     nativeAdView.bodyView = this

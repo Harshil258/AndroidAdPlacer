@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 app:shouldLoadDirect="true"/>
 
-            <com.harshil258.adplacer.adViews.NativeSmallView
+    <!--        <com.harshil258.adplacer.adViews.NativeSmallView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:shouldLoadDirectSmall="true"/>
@@ -47,7 +47,7 @@
             <com.harshil258.adplacer.adViews.NativeSmallView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:shouldLoadDirectSmall="true"/>
+                app:shouldLoadDirectSmall="true"/>-->
 
 
 

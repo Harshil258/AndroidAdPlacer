@@ -16,7 +16,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/txtTitle"
+            android:id="@+id/dialogTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_25sdp"
@@ -29,7 +29,7 @@
 
 
         <TextView
-            android:id="@+id/txtDescription"
+            android:id="@+id/dialogDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/_25sdp"
@@ -58,7 +58,7 @@
             android:gravity="start">
 
             <TextView
-                android:id="@+id/txtNegative"
+                android:id="@+id/dialogNegativeButton"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
                 android:layout_height="@dimen/_35sdp"
@@ -72,7 +72,7 @@
 
 
             <TextView
-                android:id="@+id/txtPositive"
+                android:id="@+id/dialogPositiveButton"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
                 android:layout_height="@dimen/_35sdp"

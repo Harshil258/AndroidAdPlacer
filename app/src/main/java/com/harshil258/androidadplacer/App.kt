@@ -42,7 +42,7 @@ import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isAppInForeground
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Constants.shouldGoWithoutInternet
-import com.harshil258.adplacer.utils.STATUS
+import com.harshil258.adplacer.utils.DialogUtil.createSimpleDialog
 
 
 //@Obfuscate
@@ -132,14 +132,13 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
     override fun showNetworkDialog() {
-        adPlacerApplication?.showCommonDialog(
+        createSimpleDialog(
             runningActivity,
-            "No Internet",
-            "No internet connection!\nCheck your internet connection",
-            "Exit",
-            "Retry",
-            false,
-            object : DialogCallBack {
+            title = "No Internet",
+            description = "No internet connection!\nCheck your internet connection",
+            negativeButtonText = "Exit",
+            positiveButtonText = "Retry",
+            dialogCallback = object : DialogCallBack {
                 override fun onPositiveClicked(dialog: Dialog) {
                     if (GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)) {
                         dialog.cancel()
@@ -168,7 +167,9 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
                 override fun onDialogDismissed() {
                 }
-            })
+            },
+            isCancelable = false
+        )
     }
 
     override fun exitTheApplication() {
@@ -251,7 +252,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     override fun openHomeActivity() {
         Logger.e("TAGCOMMON", "MainActivity")
 
-        runningActivity!!.finish()
+//        runningActivity!!.finish()
         val intent = Intent(runningActivity, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
@@ -274,7 +275,6 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 //        startActivity(intent)
 //        runningActivity!!.finish()
     }
-
 
 
     override fun openExtraStartActivity() {
@@ -329,8 +329,8 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 window?.setBackgroundDrawableResource(android.R.color.transparent)
                 setCancelable(true)
 
-                val txtPositive = findViewById<TextView>(R.id.txtPositive)
-                val txtNegative = findViewById<TextView>(R.id.txtNegative)
+                val txtPositive = findViewById<TextView>(R.id.dialogPositiveButton)
+                val txtNegative = findViewById<TextView>(R.id.dialogNegativeButton)
                 val mediumBanner = findViewById<BannerViewMedium>(R.id.mediumBanner)
                 val myAdViewBig = findViewById<NativeBigView>(R.id.myAdViewBig)
 
