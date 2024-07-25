@@ -413,6 +413,12 @@ class AdPlacerApplication(private val instance: Application) {
         }
     }
 
+    fun subscribeToTheTopic(tag: String) {
+        CoroutineScope(Dispatchers.Main).launch {
+            OneSignal.User.addTag("topic", tag)
+        }
+    }
+
     fun showOneSignalNotificationPrompt() {
         runningActivity?.let {
             OneSignal.initWithContext(
