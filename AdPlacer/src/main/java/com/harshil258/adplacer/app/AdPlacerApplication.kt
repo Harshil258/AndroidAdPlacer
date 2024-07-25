@@ -116,6 +116,9 @@ class AdPlacerApplication(private val instance: Application) {
     }
 
     fun continueAppFlow() {
+        messagingCallback?.startingTimerToChangeScreen()
+        Logger.d(TAG, "continueAppFlow    -->  startingTimerToChangeScreen  -->    called")
+
         Logger.d(TAG, "continueAppFlow    -->   called")
 
         handler.removeCallbacksAndMessages(null)
@@ -148,12 +151,17 @@ class AdPlacerApplication(private val instance: Application) {
                         Logger.e(TAG, "continueAppFlow    -->   opening ExtraStartActivity")
                         messagingCallback?.openExtraStartActivity()
                     }
+
                     SCREENS.START.name -> {
                         Logger.e(TAG, "continueAppFlow    -->   opening StartActivity")
                         messagingCallback?.openStartActivity()
                     }
+
                     else -> {
-                        Logger.e(TAG, "continueAppFlow    -->   opening HomeActivity (default case)")
+                        Logger.e(
+                            TAG,
+                            "continueAppFlow    -->   opening HomeActivity (default case)"
+                        )
                         messagingCallback?.openHomeActivity()
                     }
                 }
@@ -204,7 +212,10 @@ class AdPlacerApplication(private val instance: Application) {
         Logger.d(TAG, "fetchApiResponse    -->   called with whichResponse = ${whichResponse.name}")
 
         if (wantToByPassResponse && sharedPrefConfig.isResponseGot) {
-            Logger.d(TAG, "fetchApiResponse    -->   wantToByPassResponse   calling   -->   startTimerForContinueFlow")
+            Logger.d(
+                TAG,
+                "fetchApiResponse    -->   wantToByPassResponse   calling   -->   startTimerForContinueFlow"
+            )
             startTimerForContinueFlow(0)
             isContinueFlowDone = true
         }
@@ -225,7 +236,10 @@ class AdPlacerApplication(private val instance: Application) {
                 AuthorizationADS = firebaseConfig.getString("AuthorizationADS")
                 BASE_URL_API = firebaseConfig.getString("BaseUrl")
 
-                Logger.d(TAG, "fetchApiResponse    -->   LIBRARY_PACKAGE_NAME = $LIBRARY_PACKAGE_NAME")
+                Logger.d(
+                    TAG,
+                    "fetchApiResponse    -->   LIBRARY_PACKAGE_NAME = $LIBRARY_PACKAGE_NAME"
+                )
                 Logger.d(TAG, "fetchApiResponse    -->   AuthorizationADS = $AuthorizationADS")
                 Logger.d(TAG, "fetchApiResponse    -->   BASE_URL_API = $BASE_URL_API")
 
@@ -237,7 +251,10 @@ class AdPlacerApplication(private val instance: Application) {
                     .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
                 val call = AdApiClient().client.create(ApiInterface::class.java).getAll(requestBody)
 
-                Logger.d(TAG, "fetchApiResponse    -->   making API call with requestBody = $jsonBody")
+                Logger.d(
+                    TAG,
+                    "fetchApiResponse    -->   making API call with requestBody = $jsonBody"
+                )
 
                 call?.enqueue(object : Callback<ApiResponse?> {
                     override fun onResponse(
@@ -245,10 +262,18 @@ class AdPlacerApplication(private val instance: Application) {
                         response: Response<ApiResponse?>
                     ) {
                         if (response.isSuccessful && response.body() != null) {
-                            Logger.w(TAG, "fetchApiResponse    -->   API response successful: ${response.body()}")
+                            Logger.w(
+                                TAG,
+                                "fetchApiResponse    -->   API response successful: ${response.body()}"
+                            )
                             handleSuccessfulApiResponse(response.body()!!)
                         } else {
-                            Logger.d(TAG, "fetchApiResponse    -->   API response failure: ${response.errorBody()?.string()}")
+                            Logger.d(
+                                TAG,
+                                "fetchApiResponse    -->   API response failure: ${
+                                    response.errorBody()?.string()
+                                }"
+                            )
                             onFailureResponse()
                         }
                     }
@@ -260,7 +285,10 @@ class AdPlacerApplication(private val instance: Application) {
                 })
             }
         }, {
-            Logger.d(TAG, "fetchApiResponse    -->   Firebase config fetch failed, exiting application")
+            Logger.d(
+                TAG,
+                "fetchApiResponse    -->   Firebase config fetch failed, exiting application"
+            )
             messagingCallback?.exitTheApplication()
         })
     }
@@ -277,8 +305,12 @@ class AdPlacerApplication(private val instance: Application) {
             val currentVersion = getCurrentAppVersion(runningActivity)
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   currentVersion: $currentVersion")
 
-            val requiresForceUpdate = response.appDetails.forceUpdateVersions.contains(currentVersion)
-            Logger.d(TAG, "handleSuccessfulApiResponse    -->   requiresForceUpdate: $requiresForceUpdate")
+            val requiresForceUpdate =
+                response.appDetails.forceUpdateVersions.contains(currentVersion)
+            Logger.d(
+                TAG,
+                "handleSuccessfulApiResponse    -->   requiresForceUpdate: $requiresForceUpdate"
+            )
 
             val requiresUpdate = response.appDetails.updateRequiredVersions.contains(currentVersion)
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   requiresUpdate: $requiresUpdate")
@@ -287,7 +319,10 @@ class AdPlacerApplication(private val instance: Application) {
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   set isResponseGot to true")
 
             if (requiresForceUpdate || requiresUpdate) {
-                Logger.d(TAG, "handleSuccessfulApiResponse    -->   update required, removing callbacks and prompting for update")
+                Logger.d(
+                    TAG,
+                    "handleSuccessfulApiResponse    -->   update required, removing callbacks and prompting for update"
+                )
                 handler.removeCallbacksAndMessages(null)
                 promptForUpdate(
                     runningActivity,
@@ -299,7 +334,10 @@ class AdPlacerApplication(private val instance: Application) {
                     requiresUpdate
                 )
             } else {
-                Logger.d(TAG, "handleSuccessfulApiResponse    -->   no update required, saving response and continuing flow")
+                Logger.d(
+                    TAG,
+                    "handleSuccessfulApiResponse    -->   no update required, saving response and continuing flow"
+                )
                 saveApiResponse(response)
                 startTimerForContinueFlow(2000)
                 checkAndShowAdIfAvailable()
@@ -408,7 +446,7 @@ class AdPlacerApplication(private val instance: Application) {
     }
 
     fun startTimerForContinueFlow(delay: Long) {
-        if(!isContinueFlowDone){
+        if (!isContinueFlowDone) {
             handler.postDelayed({ continueAppFlow() }, delay)
         }
     }
