@@ -61,7 +61,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
 
 
-
+    implementation(libs.facebook)
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.config)
     implementation(libs.firebase.analytics)

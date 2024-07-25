@@ -1,5 +1,6 @@
 [versions]
 agp = "8.5.0"
+facebook = "6.17.0.0"
 firebaseBom = "33.1.1"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
@@ -26,6 +27,7 @@ firebaseConfigVersion = "22.0.0"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
+facebook = { module = "com.google.ads.mediation:facebook", version.ref = "facebook" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 google-firebase-config = { module = "com.google.firebase:firebase-config" }
