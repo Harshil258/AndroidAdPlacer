@@ -53,6 +53,7 @@ class NativeAdManager {
         }
 
         isAdLoading = true
+        Logger.e("ADIDSSSS", "NATIVE   ${sharedPrefConfig.appDetails.admobNativeAd}")
         val adLoader = AdLoader.Builder(
             activity,
             sharedPrefConfig.appDetails.admobNativeAd
@@ -112,6 +113,7 @@ class NativeAdManager {
             return
         }
         Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 3")
+        Logger.e("ADIDSSSS", "NATIVE   ${sharedPrefConfig.appDetails.admobNativeAd}")
 
         if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) return
 

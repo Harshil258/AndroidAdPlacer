@@ -180,6 +180,8 @@ class InterstitialManager {
 
         val adRequest = AdRequest.Builder().build()
         val AD_UNIT: String = sharedPrefConfig.appDetails.admobInterstitialAd
+        Logger.e("ADIDSSSS", "INTERSTITIAL   ${AD_UNIT}")
+
         isAdLoading = true
 
         InterstitialAd.load(activity, AD_UNIT, adRequest,

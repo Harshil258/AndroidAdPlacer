@@ -12,6 +12,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.harshil258.adplacer.utils.Logger
 
 class BannerAdManager {
     var TAG: String = "BannerAd"
@@ -43,6 +44,7 @@ class BannerAdManager {
 
         adView.setAdSize(bannerType!!)
         adView.adUnitId = sharedPrefConfig.appDetails.admobBannerAd
+        Logger.e("ADIDSSSS", "BANNER   ${adView.adUnitId}")
 
         frameLayout.removeAllViews()
         frameLayout.addView(adView)

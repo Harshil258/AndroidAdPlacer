@@ -13,6 +13,7 @@ import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
+import com.harshil258.adplacer.utils.Logger
 import java.util.Date
 
 class AppOpenManager {
@@ -80,6 +81,9 @@ class AppOpenManager {
         try {
             appOpenAdLoadCallback?.apply {
                 val build = AdRequest.Builder().build()
+
+                Logger.e("ADIDSSSS", "APP OPEN   ${sharedPrefConfig.appDetails.admobAppOpenAd}")
+
                 AppOpenAd.load(
                     activity.applicationContext,
                     sharedPrefConfig.appDetails.admobAppOpenAd.toString(),
