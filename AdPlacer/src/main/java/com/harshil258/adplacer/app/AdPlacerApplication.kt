@@ -423,6 +423,7 @@ class AdPlacerApplication(private val instance: Application) {
 
     private fun saveApiResponse(response: ApiResponse) {
         sharedPrefConfig.apiResponse = (response)
+        messagingCallback?.savingApiResponse()
     }
 
     private fun getCurrentAppVersion(activity: Activity?): String {
