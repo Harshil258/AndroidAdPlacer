@@ -269,6 +269,10 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     }
 
+    override fun savingApiResponse() {
+
+    }
+
     override fun openHowToUseActivity() {
 //        val intent = Intent(runningActivity, MainActivity::class.java)
 //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
