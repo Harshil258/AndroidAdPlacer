@@ -100,7 +100,6 @@ class AdPlacerApplication(private val instance: Application) {
     }
 
     private fun initializeMobileAds() {
-
         val backgroundScope = CoroutineScope(Dispatchers.IO)
         backgroundScope.launch {
             // Initialize the Google Mobile Ads SDK on a background thread.
