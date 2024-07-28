@@ -3,6 +3,7 @@ package com.harshil258.adplacer.utils
 import android.annotation.SuppressLint
 import android.app.Activity
 import com.harshil258.adplacer.app.AdPlacerApplication
+import java.util.Arrays
 
 @SuppressLint("StaticFieldLeak")
 object Constants {
@@ -24,5 +25,6 @@ object Constants {
     var preLoadReward = false
 
     var wantToByPassResponse = true
+    val testDeviceIds  : ArrayList<String> = java.util.ArrayList()
 
 }

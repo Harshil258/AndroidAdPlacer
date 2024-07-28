@@ -10,9 +10,12 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
+import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.gson.Gson
@@ -37,6 +40,7 @@ import com.harshil258.adplacer.utils.Constants.preLoadInterstitial
 import com.harshil258.adplacer.utils.Constants.preLoadNative
 import com.harshil258.adplacer.utils.Constants.preLoadReward
 import com.harshil258.adplacer.utils.Constants.runningActivity
+import com.harshil258.adplacer.utils.Constants.testDeviceIds
 import com.harshil258.adplacer.utils.Constants.wantToByPassResponse
 import com.harshil258.adplacer.utils.DialogUtil
 import com.harshil258.adplacer.utils.GlobalUtils
@@ -58,6 +62,7 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Arrays
 
 class AdPlacerApplication(private val instance: Application) {
 
@@ -85,8 +90,40 @@ class AdPlacerApplication(private val instance: Application) {
         }
     }
 
+    fun openAdInspactor() {
+        MobileAds.openAdInspector(runningActivity!!) { error ->
+            // Error will be non-null if ad inspector closed due to an error.
+            Logger.e(TAG, "opening openAdInspector  error    ${error?.message}")
+        }
+    }
+
     private fun initializeMobileAds() {
-        MobileAds.initialize(instance) { }
+
+        val backgroundScope = CoroutineScope(Dispatchers.IO)
+        backgroundScope.launch {
+            // Initialize the Google Mobile Ads SDK on a background thread.
+            MobileAds.initialize(instance) { initializationStatus ->
+
+                val configuration =
+                    RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+                MobileAds.setRequestConfiguration(configuration)
+
+
+                val statusMap =
+                    initializationStatus.adapterStatusMap
+                for (adapterClass in statusMap.keys) {
+                    val status = statusMap[adapterClass]
+                    Logger.d(
+                        "AdPlacerApplication", String.format(
+                            "Adapter name: %s, Description: %s, Latency: %d",
+                            adapterClass, status!!.description, status.latency
+                        )
+                    )
+                }
+
+                // Start loading ads here...
+            }
+        }
     }
 
     fun processLifecycleRegister(observer: LifecycleObserver?) {
@@ -136,6 +173,10 @@ class AdPlacerApplication(private val instance: Application) {
         val whichScreenToGo = appDetails.whichScreenToGo
         Logger.d(TAG, "continueAppFlow    -->   whichScreenToGo: $whichScreenToGo")
 
+
+
+
+
         activity.finish()
         Logger.d(TAG, "continueAppFlow    -->   finished running activity")
 
@@ -143,6 +184,8 @@ class AdPlacerApplication(private val instance: Application) {
             appDetails.howtousestart == STATUS.ON.name && !sharedPrefConfig.isHowToUseShowDone -> {
                 Logger.e(TAG, "continueAppFlow    -->   opening HowToUseActivity")
                 messagingCallback?.openHowToUseActivity()
+
+
             }
 
             whichScreenToGo.isNotEmpty() -> {

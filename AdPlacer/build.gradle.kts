@@ -60,7 +60,8 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.androidx.lifecycle.process)
 
-
+    implementation  ("com.google.ads.mediation:applovin:12.6.0.0")
+    implementation  ("com.google.ads.mediation:facebook:6.17.0.0")
     implementation(libs.facebook)
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.config)

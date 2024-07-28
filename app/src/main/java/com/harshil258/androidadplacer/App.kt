@@ -256,6 +256,9 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
         val intent = Intent(runningActivity, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
+
+
+
     }
 
     override fun gotFirebaseResponse(firebaseRemoteConfig: FirebaseRemoteConfig) {
