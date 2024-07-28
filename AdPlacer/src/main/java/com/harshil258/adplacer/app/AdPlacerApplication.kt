@@ -14,6 +14,8 @@ import android.util.Log
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
+import com.facebook.ads.AudienceNetworkAds
+import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
@@ -102,8 +104,14 @@ class AdPlacerApplication(private val instance: Application) {
         val backgroundScope = CoroutineScope(Dispatchers.IO)
         backgroundScope.launch {
             // Initialize the Google Mobile Ads SDK on a background thread.
+            AudienceNetworkAds.initialize(instance)
             MobileAds.initialize(instance) { initializationStatus ->
 
+
+                Log.e(TAG, "initializeMobileAds: DEVICE_ID_EMULATOR ${AdRequest.DEVICE_ID_EMULATOR}")
+                Log.e(TAG, "initializeMobileAds: testDeviceIds  ${testDeviceIds.toSet()}")
+                testDeviceIds.add(AdRequest.DEVICE_ID_EMULATOR)
+                Log.e(TAG, "initializeMobileAds: after testDeviceIds  ${testDeviceIds.toSet()}")
                 val configuration =
                     RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
                 MobileAds.setRequestConfiguration(configuration)

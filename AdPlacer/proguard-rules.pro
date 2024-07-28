@@ -41,6 +41,9 @@
 -keepattributes *Annotation*
 -dontwarn com.onesignal.**
 
+-keep class com.google.ads.mediation.** { *; }
+-keep class com.facebook.ads.** { *; }
+
 
 
 

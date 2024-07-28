@@ -53,6 +53,7 @@ dependencies {
 
     implementation(libs.play.services.ads)
     implementation  ("com.google.ads.mediation:facebook:6.17.0.0")
+    implementation ("com.facebook.android:audience-network-sdk:6.+")
 
 
 //    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.39")

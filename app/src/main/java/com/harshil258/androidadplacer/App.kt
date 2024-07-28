@@ -42,6 +42,7 @@ import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isAppInForeground
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Constants.shouldGoWithoutInternet
+import com.harshil258.adplacer.utils.Constants.testDeviceIds
 import com.harshil258.adplacer.utils.DialogUtil.createSimpleDialog
 
 
@@ -54,6 +55,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
         super.onCreate()
         context = applicationContext
         showLogs = true
+        testDeviceIds.add("07273c52-e840-4a96-8996-b34b55560af5")
 
         Logger.i("TAGCOMMON", "Application   onCreate:  FIRST LOG")
         registerActivityLifecycleCallbacks(this)

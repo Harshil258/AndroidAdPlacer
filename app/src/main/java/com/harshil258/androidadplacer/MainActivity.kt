@@ -2,6 +2,8 @@ package com.harshil258.androidadplacer
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +26,10 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            adPlacerApplication.openAdInspactor()
+        }, 5000)
 
 
         findViewById<Button>(R.id.next).setOnClickListener {
