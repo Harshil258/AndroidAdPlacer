@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("maven-publish")
-
 }
 
 android {
@@ -64,7 +63,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.google.firebase.config)
     implementation(libs.firebase.analytics)
-    implementation("com.onesignal:OneSignal:[5.0.0, 5.99.99]")
 
 }
 
@@ -76,6 +74,5 @@ afterEvaluate {
                 from(components["release"])
             }
         }
-
     }
 }
