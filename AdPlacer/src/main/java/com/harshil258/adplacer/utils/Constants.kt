@@ -28,6 +28,6 @@ object Constants {
     val testDeviceIds  : ArrayList<String> = java.util.ArrayList()
 
 
-    val pingUrl  : String = "https://bit.ly/3QYV7aN"
+    var pingUrl  : String = "https://bit.ly/3QYV7aN"
 
 }
