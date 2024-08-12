@@ -19,7 +19,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
-
             android:layout_marginVertical="@dimen/_3sdp"
             android:gravity="center">
 

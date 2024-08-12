@@ -45,8 +45,6 @@ class BannerView : RelativeLayout {
         val a = context.obtainStyledAttributes(attrs, R.styleable.BannerView)
         isShouldLoadDirect = a.getBoolean(R.styleable.BannerView_shouldLoadDirectBanner, true)
 
-        //a.recycle();
-
         // Check the shouldLoadDirect property and load the ad accordingly
         if (isShouldLoadDirect) {
             loadAd(context as Activity)
