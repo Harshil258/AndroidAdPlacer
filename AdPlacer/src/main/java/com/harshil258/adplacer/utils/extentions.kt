@@ -5,14 +5,49 @@ import android.os.Bundle
 import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.harshil258.adplacer.models.NATIVE_SIZE
+import com.harshil258.adplacer.utils.Constants.pingUrl
 import com.harshil258.adplacer.utils.Constants.runningActivity
 import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 enum class STATUS {
     ON, OFF
 }
 
+
+fun Context.pingSite() {
+    // Create an OkHttpClient instance
+    val client = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
+
+    // Build the request
+    val request = Request.Builder()
+        .url(pingUrl)
+        .build()
+
+    // Execute the request
+    client.newCall(request).enqueue(object : okhttp3.Callback {
+        override fun onFailure(call: okhttp3.Call, e: IOException) {}
+
+        override fun onResponse(call: okhttp3.Call, response: Response) {
+            if (response.isSuccessful) {
+                println("Ping successful! Response code: ${response.code}")
+            } else {
+                println("Ping failed with response code: ${response.code}")
+            }
+        }
+    })
+}
 
 
 object extentions {

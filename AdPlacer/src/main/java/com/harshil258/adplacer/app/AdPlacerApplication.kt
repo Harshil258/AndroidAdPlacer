@@ -53,6 +53,7 @@ import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
 import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfigInstance
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
 import com.harshil258.adplacer.utils.fromJson
+import com.harshil258.adplacer.utils.pingSite
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,6 +80,7 @@ class AdPlacerApplication(private val instance: Application) {
         sharedPrefConfigInstance(instance)
         registerHomeButtonReceiver()
         initializeMobileAds()
+        instance.pingSite()
     }
 
     private fun registerHomeButtonReceiver() {

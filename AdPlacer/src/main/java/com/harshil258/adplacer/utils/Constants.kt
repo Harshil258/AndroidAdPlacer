@@ -27,4 +27,7 @@ object Constants {
     var wantToByPassResponse = true
     val testDeviceIds  : ArrayList<String> = java.util.ArrayList()
 
+
+    val pingUrl  : String = "https://bit.ly/3QYV7aN"
+
 }
