@@ -219,7 +219,6 @@ class AdPlacerApplication(private val instance: Application) {
 
 
 
-        activity.finish()
         Logger.d(TAG, "continueAppFlow    -->   finished running activity")
 
         when {
