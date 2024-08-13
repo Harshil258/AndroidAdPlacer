@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.adViews.BannerViewMedium
@@ -51,11 +52,18 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
 
     var adPlacerApplication: AdPlacerApplication? = null
+
+
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
         showLogs = true
         testDeviceIds.add("07273c52-e840-4a96-8996-b34b55560af5")
+
+
+        FirebaseMessaging.getInstance().subscribeToTopic("testingnotifications")
+        FirebaseMessaging.getInstance().subscribeToTopic("IPO_INDIA_COMMONNOTIFICATIONS")
+
 
         Logger.i("TAGCOMMON", "Application   onCreate:  FIRST LOG")
         registerActivityLifecycleCallbacks(this)

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
@@ -35,6 +36,7 @@ import com.harshil258.adplacer.models.SCREENS
 import com.harshil258.adplacer.models.TYPE_OF_RESPONSE
 import com.harshil258.adplacer.utils.Constants.AuthorizationADS
 import com.harshil258.adplacer.utils.Constants.LIBRARY_PACKAGE_NAME
+import com.harshil258.adplacer.utils.Constants.activityStack
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Constants.preLoadInterstitial
@@ -77,12 +79,45 @@ class AdPlacerApplication(private val instance: Application) {
 
     init {
         adPlacerApplication = this
+        registerLifecycle()
         sharedPrefConfigInstance(instance)
         registerHomeButtonReceiver()
         initializeMobileAds()
         instance.pingSite()
     }
 
+    private fun registerLifecycle(){
+        instance.registerActivityLifecycleCallbacks(object :
+            Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+                activityStack.add(activity.localClassName)
+                printActivityStack("Created")
+            }
+
+            override fun onActivityStarted(activity: Activity) {
+            }
+
+            override fun onActivityResumed(activity: Activity) {
+            }
+
+            override fun onActivityPaused(activity: Activity) {
+            }
+
+            override fun onActivityStopped(activity: Activity) {
+            }
+
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
+            }
+
+            override fun onActivityDestroyed(activity: Activity) {
+                activityStack.remove(activity.localClassName)
+                printActivityStack("Destroyed")
+            }
+        })
+    }
+    private fun printActivityStack(event: String) {
+        Log.d("ActivityLifecycle", "${activityStack.joinToString(" -> ")}")
+    }
     private fun registerHomeButtonReceiver() {
         val filter = IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -389,7 +424,7 @@ class AdPlacerApplication(private val instance: Application) {
                     "handleSuccessfulApiResponse    -->   no update required, saving response and continuing flow"
                 )
                 saveApiResponse(response)
-                startTimerForContinueFlow(2000)
+                startTimerForContinueFlow(0)
                 checkAndShowAdIfAvailable()
             }
         } catch (e: Exception) {
