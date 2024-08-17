@@ -4,20 +4,18 @@ import android.app.Activity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
-import com.harshil258.adplacer.utils.GlobalUtils
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
-import com.harshil258.adplacer.utils.extentions.isBannerEmpty
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
+import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.extentions.isBannerEmpty
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
 
 class BannerAdManager {
     var TAG: String = "BannerAd"
-
-
 
     fun showBannerAd(
         activity: Activity,
@@ -43,7 +41,7 @@ class BannerAdManager {
         val adView = AdView(activity)
 
         adView.setAdSize(bannerType!!)
-        adView.adUnitId = sharedPrefConfig.appDetails.admobBannerAd
+        adView.adUnitId = secureStorageManager.appDetails.admobBannerAd
         Logger.e("ADIDSSSS", "BANNER   ${adView.adUnitId}")
 
         frameLayout.removeAllViews()

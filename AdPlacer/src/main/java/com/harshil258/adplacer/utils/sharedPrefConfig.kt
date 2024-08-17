@@ -4,18 +4,11 @@ package com.harshil258.adplacer.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
+import com.google.gson.Gson
 import com.harshil258.adplacer.models.AdsDetails
 import com.harshil258.adplacer.models.ApiResponse
 import com.harshil258.adplacer.models.AppDetails
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-
-
-inline fun <reified T> Gson.fromJson(json: String?): T {
-    return this.fromJson(json, object : TypeToken<T>() {}.type)
-}
-
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager
 
 class SharedPrefConfig(private val context: Context) {
     private val prefs: SharedPreferences? =
@@ -24,15 +17,7 @@ class SharedPrefConfig(private val context: Context) {
 
 
     companion object {
-        @SuppressLint("StaticFieldLeak")
-        lateinit var sharedPrefConfig: SharedPrefConfig
-
-        fun sharedPrefConfigInstance(context: Context){
-            sharedPrefConfig = SharedPrefConfig(context)
-        }
-
     }
-
 
     var isLoadingFirstTime: Boolean
         get() = prefs.load("isLoadingFirstTime", false)
@@ -52,16 +37,9 @@ class SharedPrefConfig(private val context: Context) {
         }
     }
 
-
-    var isResponseGot: Boolean
-        get() = prefs.load("isResponseGot", false)
-        set(value) = prefs.save("isResponseGot", value)
-
     var isHowToUseShowDone: Boolean
         get() = prefs.load("isHowToUseShowDone", false)
         set(value) = prefs.save("isHowToUseShowDone", value)
-
-
 
     var apiResponse: ApiResponse
         get() = prefs.load("API_RESPONSE", ApiResponse())
@@ -82,7 +60,6 @@ class SharedPrefConfig(private val context: Context) {
             apiResponse = updatedApiResponse
         }
 
-
     fun getStringPref(key: String, defaultValue: String?): String {
         return prefs?.getString(key, defaultValue).toString()
     }
@@ -90,6 +67,5 @@ class SharedPrefConfig(private val context: Context) {
     fun setStringPref(key: String, value: String?) {
         prefs?.edit()?.putString(key, value)?.apply()
     }
-
 }
 

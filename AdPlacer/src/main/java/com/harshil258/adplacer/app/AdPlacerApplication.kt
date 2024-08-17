@@ -51,11 +51,11 @@ import com.harshil258.adplacer.utils.HomeButtonReceiver
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.Logger.TAG
 import com.harshil258.adplacer.utils.STATUS
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfigInstance
+
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
-import com.harshil258.adplacer.utils.fromJson
 import com.harshil258.adplacer.utils.pingSite
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.initSecureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,14 +65,14 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.Arrays
 
 class AdPlacerApplication(private val instance: Application) {
 
     val appOpenManager: AppOpenManager = AppOpenManager()
     val interstitialManager: InterstitialManager = InterstitialManager()
-    private val rewardClass: RewardAdManager = RewardAdManager()
+    val rewardManager: RewardAdManager = RewardAdManager()
     val nativeAdManager: NativeAdManager = NativeAdManager()
+
     var messagingCallback: MessagingCallback? = null
     private val homeButtonReceiver: HomeButtonReceiver = HomeButtonReceiver()
     private val handler = Handler(Looper.getMainLooper())
@@ -80,7 +80,7 @@ class AdPlacerApplication(private val instance: Application) {
     init {
         adPlacerApplication = this
         registerLifecycle()
-        sharedPrefConfigInstance(instance)
+        initSecureStorageManager(instance)
         registerHomeButtonReceiver()
         initializeMobileAds()
         instance.pingSite()
@@ -115,9 +115,11 @@ class AdPlacerApplication(private val instance: Application) {
             }
         })
     }
+
     private fun printActivityStack(event: String) {
         Log.d("ActivityLifecycle", "${activityStack.joinToString(" -> ")}")
     }
+
     private fun registerHomeButtonReceiver() {
         val filter = IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -127,7 +129,7 @@ class AdPlacerApplication(private val instance: Application) {
         }
     }
 
-    fun openAdInspactor() {
+    fun openAdInspector() {
         MobileAds.openAdInspector(runningActivity!!) { error ->
             // Error will be non-null if ad inspector closed due to an error.
             Logger.e(TAG, "opening openAdInspector  error    ${error?.message}")
@@ -142,7 +144,9 @@ class AdPlacerApplication(private val instance: Application) {
             MobileAds.initialize(instance) { initializationStatus ->
 
 
-                Log.e(TAG, "initializeMobileAds: DEVICE_ID_EMULATOR ${AdRequest.DEVICE_ID_EMULATOR}")
+                Log.e(
+                    TAG, "initializeMobileAds: DEVICE_ID_EMULATOR ${AdRequest.DEVICE_ID_EMULATOR}"
+                )
                 Log.e(TAG, "initializeMobileAds: testDeviceIds  ${testDeviceIds.toSet()}")
                 testDeviceIds.add(AdRequest.DEVICE_ID_EMULATOR)
                 Log.e(TAG, "initializeMobileAds: after testDeviceIds  ${testDeviceIds.toSet()}")
@@ -151,14 +155,15 @@ class AdPlacerApplication(private val instance: Application) {
                 MobileAds.setRequestConfiguration(configuration)
 
 
-                val statusMap =
-                    initializationStatus.adapterStatusMap
+                val statusMap = initializationStatus.adapterStatusMap
                 for (adapterClass in statusMap.keys) {
                     val status = statusMap[adapterClass]
                     Logger.d(
                         "AdPlacerApplication", String.format(
                             "Adapter name: %s, Description: %s, Latency: %d",
-                            adapterClass, status!!.description, status.latency
+                            adapterClass,
+                            status!!.description,
+                            status.latency
                         )
                     )
                 }
@@ -209,7 +214,7 @@ class AdPlacerApplication(private val instance: Application) {
             return
         }
 
-        val appDetails = sharedPrefConfig.appDetails
+        val appDetails = secureStorageManager.appDetails
         Logger.d(TAG, "continueAppFlow    -->   fetched appDetails: $appDetails")
 
         val whichScreenToGo = appDetails.whichScreenToGo
@@ -222,7 +227,7 @@ class AdPlacerApplication(private val instance: Application) {
         Logger.d(TAG, "continueAppFlow    -->   finished running activity")
 
         when {
-            appDetails.howtousestart == STATUS.ON.name && !sharedPrefConfig.isHowToUseShowDone -> {
+            appDetails.howtousestart == STATUS.ON.name && !secureStorageManager.isHowToUseShowDone -> {
                 Logger.e(TAG, "continueAppFlow    -->   opening HowToUseActivity")
                 messagingCallback?.openHowToUseActivity()
 
@@ -243,8 +248,7 @@ class AdPlacerApplication(private val instance: Application) {
 
                     else -> {
                         Logger.e(
-                            TAG,
-                            "continueAppFlow    -->   opening HomeActivity (default case)"
+                            TAG, "continueAppFlow    -->   opening HomeActivity (default case)"
                         )
                         messagingCallback?.openHomeActivity()
                     }
@@ -261,8 +265,7 @@ class AdPlacerApplication(private val instance: Application) {
         Logger.e(TAG, "continueAppFlow    -->   set isSplashRunning to false")
     }
 
-
-    fun initializeAndFetchFirebaseConfig(
+    private fun initializeAndFetchFirebaseConfig(
         onSuccess: (FirebaseRemoteConfig) -> Unit,
         onFailure: () -> Unit,
         retries: Int = 3,
@@ -272,9 +275,8 @@ class AdPlacerApplication(private val instance: Application) {
         val configDefaults = mapOf("temp_response" to "default value")
         firebaseRemoteConfig.setDefaultsAsync(configDefaults)
 
-        val configSettings = FirebaseRemoteConfigSettings.Builder()
-            .setMinimumFetchIntervalInSeconds(2)
-            .build()
+        val configSettings =
+            FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(2).build()
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings)
 
         firebaseRemoteConfig.fetchAndActivate().addOnCompleteListener { task ->
@@ -295,7 +297,7 @@ class AdPlacerApplication(private val instance: Application) {
     fun fetchApiResponse(whichResponse: TYPE_OF_RESPONSE) {
         Logger.d(TAG, "fetchApiResponse    -->   called with whichResponse = ${whichResponse.name}")
 
-        if (wantToByPassResponse && sharedPrefConfig.isResponseGot) {
+        if (wantToByPassResponse && secureStorageManager.isResponseGot) {
             Logger.d(
                 TAG,
                 "fetchApiResponse    -->   wantToByPassResponse   calling   -->   startTimerForContinueFlow"
@@ -313,7 +315,7 @@ class AdPlacerApplication(private val instance: Application) {
             if (whichResponse == TYPE_OF_RESPONSE.GOOGLE) {
                 val response = firebaseConfig.getString(whichResponse.value)
                 Logger.w(TAG, "fetchApiResponse    -->   Firebase response for GOOGLE = $response")
-                val apiResponse: ApiResponse = Gson().fromJson(response)
+                val apiResponse: ApiResponse = Gson().fromJson(response, ApiResponse::class.java)
                 handleSuccessfulApiResponse(apiResponse)
             } else {
                 LIBRARY_PACKAGE_NAME = firebaseConfig.getString("LIBRARY_PACKAGE_NAME")
@@ -336,14 +338,12 @@ class AdPlacerApplication(private val instance: Application) {
                 val call = AdApiClient().client.create(ApiInterface::class.java).getAll(requestBody)
 
                 Logger.d(
-                    TAG,
-                    "fetchApiResponse    -->   making API call with requestBody = $jsonBody"
+                    TAG, "fetchApiResponse    -->   making API call with requestBody = $jsonBody"
                 )
 
                 call?.enqueue(object : Callback<ApiResponse?> {
                     override fun onResponse(
-                        call: Call<ApiResponse?>,
-                        response: Response<ApiResponse?>
+                        call: Call<ApiResponse?>, response: Response<ApiResponse?>
                     ) {
                         if (response.isSuccessful && response.body() != null) {
                             Logger.w(
@@ -353,8 +353,7 @@ class AdPlacerApplication(private val instance: Application) {
                             handleSuccessfulApiResponse(response.body()!!)
                         } else {
                             Logger.d(
-                                TAG,
-                                "fetchApiResponse    -->   API response failure: ${
+                                TAG, "fetchApiResponse    -->   API response failure: ${
                                     response.errorBody()?.string()
                                 }"
                             )
@@ -370,13 +369,11 @@ class AdPlacerApplication(private val instance: Application) {
             }
         }, {
             Logger.d(
-                TAG,
-                "fetchApiResponse    -->   Firebase config fetch failed, exiting application"
+                TAG, "fetchApiResponse    -->   Firebase config fetch failed, exiting application"
             )
             messagingCallback?.exitTheApplication()
         })
     }
-
 
     private fun onFailureResponse() {
         startTimerForContinueFlow(2000)
@@ -399,7 +396,7 @@ class AdPlacerApplication(private val instance: Application) {
             val requiresUpdate = response.appDetails.updateRequiredVersions.contains(currentVersion)
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   requiresUpdate: $requiresUpdate")
 
-            sharedPrefConfig.isResponseGot = true
+            secureStorageManager.isResponseGot = true
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   set isResponseGot to true")
 
             if (requiresForceUpdate || requiresUpdate) {
@@ -433,7 +430,6 @@ class AdPlacerApplication(private val instance: Application) {
         }
     }
 
-
     private fun promptForUpdate(
         activity: Activity?,
         title: String,
@@ -447,8 +443,7 @@ class AdPlacerApplication(private val instance: Application) {
             override fun onPositiveClicked(dialog: Dialog) {
                 val appPackageName = activity?.packageName
                 GlobalUtils().openLinkInBrowser(
-                    activity!!,
-                    "https://play.google.com/store/apps/details?id=$appPackageName"
+                    activity!!, "https://play.google.com/store/apps/details?id=$appPackageName"
                 )
             }
 
@@ -500,13 +495,13 @@ class AdPlacerApplication(private val instance: Application) {
             nativeAdManager.loadNativeAd(runningActivity!!)
         }
         if (preLoadReward) {
-            rewardClass.preloadRewardAd(runningActivity!!)
+            rewardManager.preloadRewardAd(runningActivity!!)
         }
 
     }
 
     private fun saveApiResponse(response: ApiResponse) {
-        sharedPrefConfig.apiResponse = (response)
+        secureStorageManager.apiResponse = (response)
         messagingCallback?.savingApiResponse()
     }
 
@@ -539,23 +534,20 @@ class AdPlacerApplication(private val instance: Application) {
     fun initClickCounts() {
         InterstitialManager.clickCounts = 3  // Default value
 
-        sharedPrefConfig.appDetails.interstitialAdFrequency.takeIf {
+        secureStorageManager.appDetails.interstitialAdFrequency.takeIf {
             it.isNotEmpty() && TextUtils.isDigitsOnly(
                 it
             )
-        }
-            ?.let {
-                try {
-                    InterstitialManager.clickCounts = it.toInt()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+        }?.let {
+            try {
+                InterstitialManager.clickCounts = it.toInt()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
+        }
     }
 
     companion object {
-
-
         fun initialize(app: Application): AdPlacerApplication {
             return adPlacerApplication ?: synchronized(this) {
                 adPlacerApplication ?: AdPlacerApplication(app).also { adPlacerApplication = it }

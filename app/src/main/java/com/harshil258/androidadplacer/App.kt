@@ -36,7 +36,7 @@ import com.harshil258.adplacer.utils.Constants.showLogs
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick
 import com.harshil258.adplacer.utils.Logger
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
+
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.app.AdPlacerApplication
@@ -300,13 +300,13 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
     fun showExitActivityOrDialog() {
-        if (sharedPrefConfig.appDetails.whichScreenToGo != "" && TextUtils.isDigitsOnly(
-                sharedPrefConfig.appDetails.whichScreenToGo
+        if (secureStorageManager.appDetails.whichScreenToGo != "" && TextUtils.isDigitsOnly(
+                secureStorageManager.appDetails.whichScreenToGo
             )
         ) {
             var count = 0
             try {
-                count = sharedPrefConfig.appDetails
+                count = secureStorageManager.appDetails
                     .whichScreenToGo.toInt()
             } catch (e: Exception) {
                 count = 0

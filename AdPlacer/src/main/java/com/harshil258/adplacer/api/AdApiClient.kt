@@ -2,6 +2,7 @@ package com.harshil258.adplacer.api
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.Strictness
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -13,8 +14,7 @@ class AdApiClient {
 
     private var retrofit: Retrofit? = null
 
-    private val gson: Gson = GsonBuilder()
-        .setLenient()
+    private val gson: Gson = GsonBuilder().setStrictness(Strictness.LENIENT)
         .create()
 
     private val httpClient: OkHttpClient.Builder = OkHttpClient.Builder()

@@ -115,7 +115,7 @@ class PermissionClass {
 
     companion object {
         private fun getSharedPreferences(context: Context): SharedPreferences {
-            return context.getSharedPreferences("PERMISSION", Context.MODE_MULTI_PROCESS)
+            return context.getSharedPreferences("PERMISSION", Context.MODE_PRIVATE)
         }
     }
 }

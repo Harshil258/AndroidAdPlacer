@@ -27,7 +27,7 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity> <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+            android:exported="true" /> <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3093268383573515~7253561028" />

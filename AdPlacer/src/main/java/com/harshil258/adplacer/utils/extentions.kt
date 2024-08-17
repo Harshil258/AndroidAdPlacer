@@ -2,38 +2,30 @@ package com.harshil258.adplacer.utils
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.gson.Gson
 import com.harshil258.adplacer.models.NATIVE_SIZE
 import com.harshil258.adplacer.utils.Constants.pingUrl
 import com.harshil258.adplacer.utils.Constants.runningActivity
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-
 
 enum class STATUS {
     ON, OFF
 }
 
-
 fun Context.pingSite() {
     // Create an OkHttpClient instance
-    val client = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .build()
+    val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS).build()
 
     // Build the request
-    val request = Request.Builder()
-        .url(pingUrl)
-        .build()
+    val request = Request.Builder().url(pingUrl).build()
 
     // Execute the request
     client.newCall(request).enqueue(object : okhttp3.Callback {
@@ -49,37 +41,44 @@ fun Context.pingSite() {
     })
 }
 
-
 object extentions {
 
     fun isAdStatusOn(): Boolean {
-        return runningActivity?.let { sharedPrefConfig.appDetails.adStatus } == STATUS.ON.name
+        return runningActivity?.let { secureStorageManager.appDetails.adStatus } == STATUS.ON.name
     }
 
     fun isNativeEmpty(): Boolean {
         Logger.e("TAG1232", "TAG1232  isAdStatusOn: ${isAdStatusOn()}")
-        Logger.e("TAG1232", "TAG1232  isNativeEmpty: ${runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }.isNullOrEmpty() || !isAdStatusOn()}")
-        return runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }.isNullOrEmpty() || !isAdStatusOn()
+        Logger.e("TAG1232", "TAG1232  isNativeEmpty: ${
+            runningActivity?.let { secureStorageManager.appDetails.admobNativeAd }
+                .isNullOrEmpty() || !isAdStatusOn()
+        }")
+        return runningActivity?.let { secureStorageManager.appDetails.admobNativeAd }
+            .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isInterstitialEmpty(): Boolean {
-        return runningActivity?.let { sharedPrefConfig.appDetails.admobInterstitialAd }.isNullOrEmpty() || !isAdStatusOn()
+        return runningActivity?.let { secureStorageManager.appDetails.admobInterstitialAd }
+            .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isRewardEmpty(): Boolean {
-        return runningActivity?.let { sharedPrefConfig.appDetails.admobRewardAd }.isNullOrEmpty() || !isAdStatusOn()
+        return runningActivity?.let { secureStorageManager.appDetails.admobRewardAd }
+            .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isAppOpenEmpty(): Boolean {
-        return runningActivity?.let { sharedPrefConfig.appDetails.admobAppOpenAd }.isNullOrEmpty() || !isAdStatusOn()
+        return runningActivity?.let { secureStorageManager.appDetails.admobAppOpenAd }
+            .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isBannerEmpty(): Boolean {
-        return runningActivity?.let { sharedPrefConfig.appDetails.admobBannerAd }.isNullOrEmpty() || !isAdStatusOn()
+        return runningActivity?.let { secureStorageManager.appDetails.admobBannerAd }
+            .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun nativeAdSizeBigOrSmall(): NATIVE_SIZE {
-        val appDetails = runningActivity?.let { sharedPrefConfig.appDetails }
+        val appDetails = runningActivity?.let { secureStorageManager.appDetails }
 
         return when {
             appDetails?.nativeBigOrSmall == "LARGE" -> NATIVE_SIZE.LARGE
@@ -90,7 +89,7 @@ object extentions {
 
 
     fun nativeAdSizeMediumOrSmall(): NATIVE_SIZE {
-        val appDetails = runningActivity?.let { sharedPrefConfig.appDetails }
+        val appDetails = runningActivity?.let { secureStorageManager.appDetails }
 
         return when {
             appDetails?.nativeMediumOrSmall == "MEDIUM" -> NATIVE_SIZE.MEDIUM
@@ -109,8 +108,13 @@ object extentions {
         firebaseAnalytics.logEvent("$eventName$parameterName$parameterValue", params)
     }
 
-
-
 }
 
+fun <A> String.fromJson(type: Class<A>): A {
+    return Gson().fromJson(this, type)
+}
+
+fun <A> A.toJson(): String? {
+    return Gson().toJson(this)
+}
 

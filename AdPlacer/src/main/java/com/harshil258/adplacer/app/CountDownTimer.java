@@ -1,103 +1,88 @@
 package com.harshil258.adplacer.app;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+
+import androidx.annotation.NonNull;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public abstract class CountDownTimer {
 
-private final long mMillisInFuture;
+    private final long mMillisInFuture;
+    private final long mCountdownInterval;
+    private long mStopTimeInFuture;
+    private long mPauseTime;
 
+    private final AtomicBoolean mCancelled = new AtomicBoolean(false);
+    private final AtomicBoolean mPaused = new AtomicBoolean(false);
 
-private final long mCountdownInterval;
+    public CountDownTimer(long millisInFuture, long countDownInterval) {
+        mMillisInFuture = millisInFuture;
+        mCountdownInterval = countDownInterval;
+    }
 
-private long mStopTimeInFuture;
+    public final void cancel() {
+        mHandler.removeMessages(MSG);
+        mCancelled.set(true);
+    }
 
-private long mPauseTime;
-
-private boolean mCancelled = false;
-
-private boolean mPaused = false;
-
-
-public CountDownTimer(long millisInFuture, long countDownInterval) {
-    mMillisInFuture = millisInFuture;
-    mCountdownInterval = countDownInterval;
-}
-
-public final void cancel() {
-    mHandler.removeMessages(MSG);
-    mCancelled = true;
-}
-
-public synchronized final CountDownTimer start() {
-    if (mMillisInFuture <= 0) {
-        onFinish();
+    public synchronized final CountDownTimer start() {
+        if (mMillisInFuture <= 0) {
+            onFinish();
+            return this;
+        }
+        mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
+        mCancelled.set(false);
+        mPaused.set(false);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG));
         return this;
     }
-    mStopTimeInFuture = SystemClock.elapsedRealtime() + mMillisInFuture;
-    mHandler.sendMessage(mHandler.obtainMessage(MSG));
-    mCancelled = false;
-    mPaused = false;
-    return this;
-}
 
+    public long pause() {
+        if (!mPaused.getAndSet(true)) {
+            mPauseTime = mStopTimeInFuture - SystemClock.elapsedRealtime();
+        }
+        return mPauseTime;
+    }
 
-public long pause() {
-    mPauseTime = mStopTimeInFuture - SystemClock.elapsedRealtime();
-    mPaused = true;
-    return mPauseTime;
-}
+    public long resume() {
+        if (mPaused.getAndSet(false)) {
+            mStopTimeInFuture = mPauseTime + SystemClock.elapsedRealtime();
+            mHandler.sendMessage(mHandler.obtainMessage(MSG));
+        }
+        return mPauseTime;
+    }
 
+    public abstract void onTick(long millisUntilFinished);
 
-public long resume() {
-    mStopTimeInFuture = mPauseTime + SystemClock.elapsedRealtime();
-    mPaused = false;
-    mHandler.sendMessage(mHandler.obtainMessage(MSG));
-    return mPauseTime;
-}
+    public abstract void onFinish();
 
+    private static final int MSG = 1;
 
-public abstract void onTick(long millisUntilFinished);
-
-
-public abstract void onFinish();
-
-
-private static final int MSG = 1;
-
-
-
-private Handler mHandler = new Handler() {
-
-    @Override
-    public void handleMessage(Message msg) {
-
-        synchronized (CountDownTimer.this) {
-            if (!mPaused) {
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if (!mPaused.get()) {
                 final long millisLeft = mStopTimeInFuture - SystemClock.elapsedRealtime();
 
                 if (millisLeft <= 0) {
                     onFinish();
                 } else if (millisLeft < mCountdownInterval) {
-
-                    sendMessageDelayed(obtainMessage(MSG), millisLeft);
+                    sendMessageAtTime(obtainMessage(MSG), SystemClock.elapsedRealtime() + millisLeft);
                 } else {
                     long lastTickStart = SystemClock.elapsedRealtime();
                     onTick(millisLeft);
 
-
                     long delay = lastTickStart + mCountdownInterval - SystemClock.elapsedRealtime();
 
-
-
-                    while (delay < 0) delay += mCountdownInterval;
-
-                    if (!mCancelled) {
-                        sendMessageDelayed(obtainMessage(MSG), delay);
+                    if (!mCancelled.get()) {
+                        sendMessageAtTime(obtainMessage(MSG), SystemClock.elapsedRealtime() + Math.max(0, delay));
                     }
                 }
             }
         }
-    }
-};
+    };
 }

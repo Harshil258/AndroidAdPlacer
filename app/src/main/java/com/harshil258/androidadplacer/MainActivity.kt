@@ -12,7 +12,6 @@ import androidx.core.view.WindowInsetsCompat
 import com.harshil258.adplacer.interfaces.InterAdCallBack
 import com.harshil258.adplacer.utils.Constants.runningActivity
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         Handler(Looper.getMainLooper()).postDelayed({
-            adPlacerApplication.openAdInspactor()
+            adPlacerApplication.openAdInspector()
         }, 5000)
 
 

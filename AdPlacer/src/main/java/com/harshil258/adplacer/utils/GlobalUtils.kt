@@ -8,7 +8,8 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.SystemClock
 import android.widget.Toast
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+
 
 class GlobalUtils {
     fun isNetworkAvailable(context: Context): Boolean {
@@ -71,9 +72,8 @@ class GlobalUtils {
 
     fun privacy(context: Activity) {
         if (!checkMultipleClick(2000)) {
-            val appDetail = sharedPrefConfig.appDetails
-            if (appDetail?.privacyPolicyUrl != null && appDetail.privacyPolicyUrl != ""
-                && !appDetail.privacyPolicyUrl.isEmpty()
+            val appDetail = secureStorageManager.appDetails
+            if (appDetail.privacyPolicyUrl != "" && appDetail.privacyPolicyUrl.isNotEmpty()
             ) {
                 val i = Intent(
                     Intent.ACTION_VIEW,

@@ -1,18 +1,19 @@
 package com.harshil258.adplacer.adClass
 
 import android.app.Activity
-import com.harshil258.adplacer.interfaces.AdCallback
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
-import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
+import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.Logger.TAG
+import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
 import java.util.Date
 
 class AppOpenManager {
@@ -40,6 +41,7 @@ class AppOpenManager {
                             try {
                                 adPlacerApplication.messagingCallback!!.hideSplashLoader()
                             } catch (e: Exception) {
+                                Logger.e(TAG, "onAdShowedFullScreenContent: ${e.message}")
                             }
                         }
                     }
@@ -64,6 +66,7 @@ class AppOpenManager {
         if (appOpenAd != null) {
             return
         }
+
         appOpenAdLoadCallback = object : AppOpenAdLoadCallback() {
             override fun onAdLoaded(ad: AppOpenAd) {
                 appOpenAd = ad
@@ -81,13 +84,12 @@ class AppOpenManager {
             appOpenAdLoadCallback?.apply {
                 val build = AdRequest.Builder().build()
 
-                Logger.e("ADIDSSSS", "APP OPEN   ${sharedPrefConfig.appDetails.admobAppOpenAd}")
+                Logger.e("ADIDSSSS", "APP OPEN   ${secureStorageManager.appDetails.admobAppOpenAd}")
 
                 AppOpenAd.load(
                     activity.applicationContext,
-                    sharedPrefConfig.appDetails.admobAppOpenAd.toString(),
+                    secureStorageManager.appDetails.admobAppOpenAd,
                     build,
-                    AppOpenAd.APP_OPEN_AD_ORIENTATION_PORTRAIT,
                     this
                 )
             }

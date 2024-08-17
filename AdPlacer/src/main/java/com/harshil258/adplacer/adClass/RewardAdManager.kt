@@ -2,38 +2,40 @@ package com.harshil258.adplacer.adClass
 
 import android.app.Activity
 import android.app.Dialog
+import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.text.TextUtils
 import android.view.ViewGroup
 import android.widget.Toast
-import com.harshil258.adplacer.interfaces.RewardAdCallBack
-import com.harshil258.adplacer.utils.GlobalUtils
-import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick2
-import com.harshil258.adplacer.utils.SharedPrefConfig.Companion.sharedPrefConfig
-import com.harshil258.adplacer.utils.extentions.isRewardEmpty
-import com.harshil258.adplacer.R
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.harshil258.adplacer.R
+import com.harshil258.adplacer.interfaces.RewardAdCallBack
 import com.harshil258.adplacer.utils.Constants.isAppInForeground
+import com.harshil258.adplacer.utils.GlobalUtils
+import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick2
+import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.extentions.isRewardEmpty
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
 
 class RewardAdManager {
     var TAG: String = "Interstitial"
 
 
-    fun isCounterSatisfy(activity: Activity): Boolean {
+    fun isCounterSatisfy(): Boolean {
         try {
-            val appDetail = sharedPrefConfig.appDetails
+            val appDetail = secureStorageManager.appDetails
             if (!isRewardEmpty()) {
                 if (appDetail.rewardAdFrequency.isEmpty() || appDetail.rewardAdFrequency == "" || !TextUtils.isDigitsOnly(appDetail.rewardAdFrequency)
                 ) {
                     counter = 3
                 } else {
                     try {
-                        counter = appDetail.rewardAdFrequency.toString().toInt()
+                        counter = appDetail.rewardAdFrequency.toInt()
                     } catch (e: Exception) {
                         counter = 3
                         e.printStackTrace()
@@ -64,7 +66,7 @@ class RewardAdManager {
             return
         }
         if (isAdLoading) {
-            showLoadingDialog(activity, callBack)
+            showLoadingDialog(activity)
             startTimerForContinueFlow(activity, 5000, callBack)
 
 
@@ -76,13 +78,11 @@ class RewardAdManager {
         }
         if (mRewardAd != null) {
             isAdLoading = false
-            if (!AppOpenManager.isAdShowing) {
-                if (isCounterSatisfy(activity)) {
-                    startTimerForContinueFlow(activity, 5000, callBack)
-                } else {
-                    if (isAppInForeground) {
-                        callBack.onContinueFlow()
-                    }
+            if (isCounterSatisfy()) {
+                startTimerForContinueFlow(activity, 5000, callBack)
+            } else {
+                if (isAppInForeground) {
+                    callBack.onContinueFlow()
                 }
             }
             return
@@ -103,9 +103,9 @@ class RewardAdManager {
             return
         }
         if (!AppOpenManager.isAdShowing) {
-            if (isCounterSatisfy(activity)) {
+            if (isCounterSatisfy()) {
                 loadRewardAd(activity, callBack)
-                showLoadingDialog(activity, callBack)
+                showLoadingDialog(activity)
                 startTimerForContinueFlow(activity, 5000, callBack)
             } else {
                 if (isAppInForeground) {
@@ -121,7 +121,7 @@ class RewardAdManager {
         }
 
         val adRequest = AdRequest.Builder().build()
-        val AD_UNIT: String = sharedPrefConfig.appDetails.admobRewardAd
+        val AD_UNIT: String = secureStorageManager.appDetails.admobRewardAd
         isAdLoading = true
         RewardedAd.load(activity, AD_UNIT, adRequest, object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
@@ -131,6 +131,7 @@ class RewardAdManager {
 
                 if (callBack != null) {
                     if (isAppInForeground) {
+                        Logger.d(TAG, "onAdFailedToLoad: AppIsInForeground")
                     }
                 }
             }
@@ -164,8 +165,8 @@ class RewardAdManager {
 
     fun stopLoadingdialog() {
         try {
-            if (dialog != null && dialog!!.isShowing) {
-                dialog!!.dismiss()
+            if (dialog != null && dialog?.isShowing == true) {
+                dialog?.dismiss()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -188,13 +189,11 @@ class RewardAdManager {
         timer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 1000L) {
             override fun onTick(millisUntilFinished: Long) {
                 if (AppOpenManager.isAdShowing || !isAppInForeground) {
-                    timer!!.pause()
+                    timer?.pause()
                     stopLoadingdialog()
-                } else if (isAppInForeground && mRewardAd != null && !isAdLoading) {
-                    if (!AppOpenManager.isAdShowing) {
-                        showRewardAd(activity, callBack)
-                    }
-                    timer!!.pause()
+                } else if (mRewardAd != null && !isAdLoading) {
+                    showRewardAd(activity, callBack)
+                    timer?.pause()
                     stopLoadingdialog()
                 }
             }
@@ -210,25 +209,25 @@ class RewardAdManager {
 
     var dialog: Dialog? = null
 
-    private fun showLoadingDialog(activity: Activity, callBack: RewardAdCallBack) {
+    private fun showLoadingDialog(activity: Activity) {
         try {
-            if (dialog != null && dialog!!.isShowing) {
-                dialog!!.dismiss()
+            if (dialog != null && dialog?.isShowing == true) {
+                dialog?.dismiss()
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
         dialog = Dialog(activity)
-        dialog!!.setContentView(R.layout.dialog_ad_loading)
-        dialog!!.window!!.setLayout(
+        dialog?.setContentView(R.layout.dialog_ad_loading)
+        dialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        dialog!!.window!!.setBackgroundDrawable(ColorDrawable(activity.resources.getColor(R.color.transparent)))
-        dialog!!.setCancelable(false)
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.setCancelable(false)
         try {
             if (!activity.isFinishing) {
-                dialog!!.show()
+                dialog?.show()
             }
         } catch (e: Exception) {
             e.printStackTrace()
