@@ -12,7 +12,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.extentions.isBannerEmpty
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 class BannerAdManager {
     var TAG: String = "BannerAd"
@@ -41,7 +41,7 @@ class BannerAdManager {
         val adView = AdView(activity)
 
         adView.setAdSize(bannerType!!)
-        adView.adUnitId = secureStorageManager.appDetails.admobBannerAd
+        adView.adUnitId = sharedPrefConfig.appDetails.admobBannerAd
         Logger.e("ADIDSSSS", "BANNER   ${adView.adUnitId}")
 
         frameLayout.removeAllViews()

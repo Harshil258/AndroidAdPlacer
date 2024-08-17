@@ -7,7 +7,7 @@ import com.google.gson.Gson
 import com.harshil258.adplacer.models.NATIVE_SIZE
 import com.harshil258.adplacer.utils.Constants.pingUrl
 import com.harshil258.adplacer.utils.Constants.runningActivity
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -44,41 +44,41 @@ fun Context.pingSite() {
 object extentions {
 
     fun isAdStatusOn(): Boolean {
-        return runningActivity?.let { secureStorageManager.appDetails.adStatus } == STATUS.ON.name
+        return runningActivity?.let { sharedPrefConfig.appDetails.adStatus } == STATUS.ON.name
     }
 
     fun isNativeEmpty(): Boolean {
         Logger.e("TAG1232", "TAG1232  isAdStatusOn: ${isAdStatusOn()}")
         Logger.e("TAG1232", "TAG1232  isNativeEmpty: ${
-            runningActivity?.let { secureStorageManager.appDetails.admobNativeAd }
+            runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }
                 .isNullOrEmpty() || !isAdStatusOn()
         }")
-        return runningActivity?.let { secureStorageManager.appDetails.admobNativeAd }
+        return runningActivity?.let { sharedPrefConfig.appDetails.admobNativeAd }
             .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isInterstitialEmpty(): Boolean {
-        return runningActivity?.let { secureStorageManager.appDetails.admobInterstitialAd }
+        return runningActivity?.let { sharedPrefConfig.appDetails.admobInterstitialAd }
             .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isRewardEmpty(): Boolean {
-        return runningActivity?.let { secureStorageManager.appDetails.admobRewardAd }
+        return runningActivity?.let { sharedPrefConfig.appDetails.admobRewardAd }
             .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isAppOpenEmpty(): Boolean {
-        return runningActivity?.let { secureStorageManager.appDetails.admobAppOpenAd }
+        return runningActivity?.let { sharedPrefConfig.appDetails.admobAppOpenAd }
             .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun isBannerEmpty(): Boolean {
-        return runningActivity?.let { secureStorageManager.appDetails.admobBannerAd }
+        return runningActivity?.let { sharedPrefConfig.appDetails.admobBannerAd }
             .isNullOrEmpty() || !isAdStatusOn()
     }
 
     fun nativeAdSizeBigOrSmall(): NATIVE_SIZE {
-        val appDetails = runningActivity?.let { secureStorageManager.appDetails }
+        val appDetails = runningActivity?.let { sharedPrefConfig.appDetails }
 
         return when {
             appDetails?.nativeBigOrSmall == "LARGE" -> NATIVE_SIZE.LARGE
@@ -89,7 +89,7 @@ object extentions {
 
 
     fun nativeAdSizeMediumOrSmall(): NATIVE_SIZE {
-        val appDetails = runningActivity?.let { secureStorageManager.appDetails }
+        val appDetails = runningActivity?.let { sharedPrefConfig.appDetails }
 
         return when {
             appDetails?.nativeMediumOrSmall == "MEDIUM" -> NATIVE_SIZE.MEDIUM

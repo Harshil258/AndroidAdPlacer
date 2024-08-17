@@ -8,7 +8,7 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.SystemClock
 import android.widget.Toast
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 
 class GlobalUtils {
@@ -72,7 +72,7 @@ class GlobalUtils {
 
     fun privacy(context: Activity) {
         if (!checkMultipleClick(2000)) {
-            val appDetail = secureStorageManager.appDetails
+            val appDetail = sharedPrefConfig.appDetails
             if (appDetail.privacyPolicyUrl != "" && appDetail.privacyPolicyUrl.isNotEmpty()
             ) {
                 val i = Intent(

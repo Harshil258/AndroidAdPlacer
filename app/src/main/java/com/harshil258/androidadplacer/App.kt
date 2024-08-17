@@ -45,6 +45,7 @@ import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Constants.shouldGoWithoutInternet
 import com.harshil258.adplacer.utils.Constants.testDeviceIds
 import com.harshil258.adplacer.utils.DialogUtil.createSimpleDialog
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 
 //@Obfuscate
@@ -260,10 +261,11 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     override fun openHomeActivity() {
         Logger.e("TAGCOMMON", "MainActivity")
 
-//        runningActivity!!.finish()
+        runningActivity!!.finish()
         val intent = Intent(runningActivity, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
+
 
 
 
@@ -300,13 +302,13 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
     fun showExitActivityOrDialog() {
-        if (secureStorageManager.appDetails.whichScreenToGo != "" && TextUtils.isDigitsOnly(
-                secureStorageManager.appDetails.whichScreenToGo
+        if (sharedPrefConfig.appDetails.whichScreenToGo != "" && TextUtils.isDigitsOnly(
+                sharedPrefConfig.appDetails.whichScreenToGo
             )
         ) {
             var count = 0
             try {
-                count = secureStorageManager.appDetails
+                count = sharedPrefConfig.appDetails
                     .whichScreenToGo.toInt()
             } catch (e: Exception) {
                 count = 0

@@ -10,12 +10,9 @@ import com.harshil258.adplacer.models.AppDetails
 import com.harshil258.adplacer.utils.Logger
 
 interface ISecureStorageManager {
-    var isLoadingFirstTime: Boolean
-    var isHowToUseShowDone: Boolean
     var apiResponse: ApiResponse
     var appDetails: AppDetails
     var adsDetails: AdsDetails
-    var isResponseGot: Boolean
 
     fun clearAll()
 }
@@ -30,26 +27,24 @@ class SecureStorageManager(
         private const val IS_RESPONSE_GOT = "isResponseGot"
 
         @SuppressLint("StaticFieldLeak")
-        lateinit var secureStorageManager: SecureStorageManager
+        lateinit var sharedPrefConfig: SecureStorageManager
 
         fun initSecureStorageManager(context: Context){
-            secureStorageManager = SecureStorageManager(context)
+            sharedPrefConfig = SecureStorageManager(context)
         }
     }
 
     private val encryptedPrefs: SharedPreferences = context.getSharedPreferences("H_VEKARIYA", 0)
 
-    override var isLoadingFirstTime: Boolean by BooleanPreferenceDelegate(
+    var isLoadingFirstTime: Boolean by BooleanPreferenceDelegate(
         encryptedPrefs, IS_LOADING_FIRST_TIME
     )
 
-    override var isHowToUseShowDone: Boolean by BooleanPreferenceDelegate(
+    var isHowToUseShowDone: Boolean by BooleanPreferenceDelegate(
         encryptedPrefs, IS_HOW_TO_USE_SHOW_DONE
     )
 
-    override var isResponseGot: Boolean by BooleanPreferenceDelegate(
-        encryptedPrefs, IS_RESPONSE_GOT
-    )
+    var isResponseGot: Boolean  = encryptedPrefs.getBoolean(IS_HOW_TO_USE_SHOW_DONE, false)
 
     override var apiResponse: ApiResponse by DataModelPreferenceDelegate(
         encryptedPrefs, API_RESPONSE, ApiResponse::class.java, ApiResponse()

@@ -20,7 +20,7 @@ import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick2
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.extentions.isRewardEmpty
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 class RewardAdManager {
     var TAG: String = "Interstitial"
@@ -28,7 +28,7 @@ class RewardAdManager {
 
     fun isCounterSatisfy(): Boolean {
         try {
-            val appDetail = secureStorageManager.appDetails
+            val appDetail = sharedPrefConfig.appDetails
             if (!isRewardEmpty()) {
                 if (appDetail.rewardAdFrequency.isEmpty() || appDetail.rewardAdFrequency == "" || !TextUtils.isDigitsOnly(appDetail.rewardAdFrequency)
                 ) {
@@ -121,7 +121,7 @@ class RewardAdManager {
         }
 
         val adRequest = AdRequest.Builder().build()
-        val AD_UNIT: String = secureStorageManager.appDetails.admobRewardAd
+        val AD_UNIT: String = sharedPrefConfig.appDetails.admobRewardAd
         isAdLoading = true
         RewardedAd.load(activity, AD_UNIT, adRequest, object : RewardedAdLoadCallback() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {

@@ -55,7 +55,7 @@ import com.harshil258.adplacer.utils.STATUS
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
 import com.harshil258.adplacer.utils.pingSite
 import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.initSecureStorageManager
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,15 +72,14 @@ class AdPlacerApplication(private val instance: Application) {
     val interstitialManager: InterstitialManager = InterstitialManager()
     val rewardManager: RewardAdManager = RewardAdManager()
     val nativeAdManager: NativeAdManager = NativeAdManager()
-
     var messagingCallback: MessagingCallback? = null
     private val homeButtonReceiver: HomeButtonReceiver = HomeButtonReceiver()
     private val handler = Handler(Looper.getMainLooper())
 
     init {
         adPlacerApplication = this
-        registerLifecycle()
         initSecureStorageManager(instance)
+        registerLifecycle()
         registerHomeButtonReceiver()
         initializeMobileAds()
         instance.pingSite()
@@ -161,9 +160,7 @@ class AdPlacerApplication(private val instance: Application) {
                     Logger.d(
                         "AdPlacerApplication", String.format(
                             "Adapter name: %s, Description: %s, Latency: %d",
-                            adapterClass,
-                            status!!.description,
-                            status.latency
+                            adapterClass, status!!.description, status.latency
                         )
                     )
                 }
@@ -214,7 +211,7 @@ class AdPlacerApplication(private val instance: Application) {
             return
         }
 
-        val appDetails = secureStorageManager.appDetails
+        val appDetails = sharedPrefConfig.appDetails
         Logger.d(TAG, "continueAppFlow    -->   fetched appDetails: $appDetails")
 
         val whichScreenToGo = appDetails.whichScreenToGo
@@ -227,7 +224,7 @@ class AdPlacerApplication(private val instance: Application) {
         Logger.d(TAG, "continueAppFlow    -->   finished running activity")
 
         when {
-            appDetails.howtousestart == STATUS.ON.name && !secureStorageManager.isHowToUseShowDone -> {
+            appDetails.howtousestart == STATUS.ON.name && !sharedPrefConfig.isHowToUseShowDone -> {
                 Logger.e(TAG, "continueAppFlow    -->   opening HowToUseActivity")
                 messagingCallback?.openHowToUseActivity()
 
@@ -297,7 +294,7 @@ class AdPlacerApplication(private val instance: Application) {
     fun fetchApiResponse(whichResponse: TYPE_OF_RESPONSE) {
         Logger.d(TAG, "fetchApiResponse    -->   called with whichResponse = ${whichResponse.name}")
 
-        if (wantToByPassResponse && secureStorageManager.isResponseGot) {
+        if (wantToByPassResponse && sharedPrefConfig.isResponseGot) {
             Logger.d(
                 TAG,
                 "fetchApiResponse    -->   wantToByPassResponse   calling   -->   startTimerForContinueFlow"
@@ -338,7 +335,8 @@ class AdPlacerApplication(private val instance: Application) {
                 val call = AdApiClient().client.create(ApiInterface::class.java).getAll(requestBody)
 
                 Logger.d(
-                    TAG, "fetchApiResponse    -->   making API call with requestBody = $jsonBody"
+                    TAG,
+                    "fetchApiResponse    -->   making API call with requestBody = $jsonBody"
                 )
 
                 call?.enqueue(object : Callback<ApiResponse?> {
@@ -375,6 +373,7 @@ class AdPlacerApplication(private val instance: Application) {
         })
     }
 
+
     private fun onFailureResponse() {
         startTimerForContinueFlow(2000)
         checkAndShowAdIfAvailable()
@@ -396,7 +395,7 @@ class AdPlacerApplication(private val instance: Application) {
             val requiresUpdate = response.appDetails.updateRequiredVersions.contains(currentVersion)
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   requiresUpdate: $requiresUpdate")
 
-            secureStorageManager.isResponseGot = true
+            sharedPrefConfig.isResponseGot = true
             Logger.d(TAG, "handleSuccessfulApiResponse    -->   set isResponseGot to true")
 
             if (requiresForceUpdate || requiresUpdate) {
@@ -430,6 +429,7 @@ class AdPlacerApplication(private val instance: Application) {
         }
     }
 
+
     private fun promptForUpdate(
         activity: Activity?,
         title: String,
@@ -443,7 +443,8 @@ class AdPlacerApplication(private val instance: Application) {
             override fun onPositiveClicked(dialog: Dialog) {
                 val appPackageName = activity?.packageName
                 GlobalUtils().openLinkInBrowser(
-                    activity!!, "https://play.google.com/store/apps/details?id=$appPackageName"
+                    activity!!,
+                    "https://play.google.com/store/apps/details?id=$appPackageName"
                 )
             }
 
@@ -501,7 +502,7 @@ class AdPlacerApplication(private val instance: Application) {
     }
 
     private fun saveApiResponse(response: ApiResponse) {
-        secureStorageManager.apiResponse = (response)
+        sharedPrefConfig.apiResponse = (response)
         messagingCallback?.savingApiResponse()
     }
 
@@ -534,20 +535,23 @@ class AdPlacerApplication(private val instance: Application) {
     fun initClickCounts() {
         InterstitialManager.clickCounts = 3  // Default value
 
-        secureStorageManager.appDetails.interstitialAdFrequency.takeIf {
+        sharedPrefConfig.appDetails.interstitialAdFrequency.takeIf {
             it.isNotEmpty() && TextUtils.isDigitsOnly(
                 it
             )
-        }?.let {
-            try {
-                InterstitialManager.clickCounts = it.toInt()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
+            ?.let {
+                try {
+                    InterstitialManager.clickCounts = it.toInt()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
     }
 
     companion object {
+
+
         fun initialize(app: Application): AdPlacerApplication {
             return adPlacerApplication ?: synchronized(this) {
                 adPlacerApplication ?: AdPlacerApplication(app).also { adPlacerApplication = it }

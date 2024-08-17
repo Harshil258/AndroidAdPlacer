@@ -1,7 +1,6 @@
 package com.harshil258.adplacer.adClass
 
 import android.app.Activity
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -29,8 +28,7 @@ import com.harshil258.adplacer.utils.extentions.isAdStatusOn
 import com.harshil258.adplacer.utils.extentions.isNativeEmpty
 import com.harshil258.adplacer.utils.extentions.nativeAdSizeBigOrSmall
 import com.harshil258.adplacer.utils.extentions.nativeAdSizeMediumOrSmall
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 import java.util.Random
 
 class NativeAdManager {
@@ -54,9 +52,9 @@ class NativeAdManager {
         }
 
         isAdLoading = true
-        Logger.e("ADIDSSSS", "NATIVE   ${secureStorageManager.appDetails.admobNativeAd}")
+        Logger.e("ADIDSSSS", "NATIVE   ${sharedPrefConfig.appDetails.admobNativeAd}")
         val adLoader = AdLoader.Builder(
-            activity, secureStorageManager.appDetails.admobNativeAd
+            activity, sharedPrefConfig.appDetails.admobNativeAd
         ).forNativeAd { nativeAd ->
             isAdLoading = false
             Companion.nativeAd = nativeAd
@@ -67,7 +65,7 @@ class NativeAdManager {
                 isAdLoading = false
                 Logger.e(
                     "NATIVELOADIMPRESSION",
-                    "ERROR ${adError.message}   ${secureStorageManager.appDetails.admobNativeAd}"
+                    "ERROR ${adError.message}   ${sharedPrefConfig.appDetails.admobNativeAd}"
                 )
 
             }
@@ -105,12 +103,12 @@ class NativeAdManager {
             return
         }
         Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 3")
-        Logger.e("ADIDSSSS", "NATIVE   ${secureStorageManager.appDetails.admobNativeAd}")
+        Logger.e("ADIDSSSS", "NATIVE   ${sharedPrefConfig.appDetails.admobNativeAd}")
 
         if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) return
 
         val adLoader = AdLoader.Builder(
-            activity, secureStorageManager.appDetails.admobNativeAd
+            activity, sharedPrefConfig.appDetails.admobNativeAd
         ).forNativeAd { nativeAd ->
             Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 4 Loaded")
             Logger.e("NATIVELOADIMPRESSION", "LOADED")
@@ -124,7 +122,7 @@ class NativeAdManager {
                 rlNative.visibility = View.GONE
                 Logger.e(
                     "NATIVELOADIMPRESSION",
-                    "FAILED    ${adError.message}  ${secureStorageManager.appDetails.admobNativeAd}"
+                    "FAILED    ${adError.message}  ${sharedPrefConfig.appDetails.admobNativeAd}"
                 )
 
                 adDisplayedCallback.adDisplayedCallback(false)
@@ -308,7 +306,7 @@ class NativeAdManager {
         isOnDemand: Boolean,
         adDisplayedCallback: AdCallback
     ) {
-        Log.w("NATIVEADSSS", "populateNativeAdView: 1")
+        Logger.w("NATIVEADSSS", "populateNativeAdView: 1")
         val nativeAdView = when (NATIVESIZE) {
             NATIVE_SIZE.MEDIUM -> activity.layoutInflater.inflate(
                 R.layout.ad_layout_native_medium, null
@@ -323,7 +321,7 @@ class NativeAdManager {
             ) as NativeAdView
         }
 
-        Log.w("NATIVEADSSS", "populateNativeAdView: 2")
+        Logger.w("NATIVEADSSS", "populateNativeAdView: 2")
         nativeAdView.apply {
             adDisplayedCallback.adDisplayedCallback(true)
             findViewById<TextView>(R.id.txtHead)?.apply {
@@ -396,22 +394,22 @@ class NativeAdManager {
                 }
             }
 
-            Log.w("NATIVEADSSS", "populateNativeAdView: 3")
+            Logger.w("NATIVEADSSS", "populateNativeAdView: 3")
             setNativeAd(nativeAd)
         }
 
-        Log.w("NATIVEADSSS", "populateNativeAdView: 4")
+        Logger.w("NATIVEADSSS", "populateNativeAdView: 4")
         frameLayout.removeAllViews()
         frameLayout.addView(nativeAdView)
 
-        Log.w("NATIVEADSSS", "populateNativeAdView: 5")
+        Logger.w("NATIVEADSSS", "populateNativeAdView: 5")
         if (!isOnDemand) {
             Companion.nativeAd = null
             if (adPlacerApplication.messagingCallback?.isExitActivity != true) {
                 loadNativeAd(activity)
             }
         }
-        Log.w("NATIVEADSSS", "populateNativeAdView: 6")
+        Logger.w("NATIVEADSSS", "populateNativeAdView: 6")
     }
 
 

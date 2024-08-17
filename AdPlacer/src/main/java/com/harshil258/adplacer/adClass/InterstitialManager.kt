@@ -19,13 +19,13 @@ import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.extentions.isInterstitialEmpty
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 class InterstitialManager {
     var TAG: String = "Interstitial"
 
     private fun isCounterSatisfy(activity: Activity): Boolean {
-        val appDetail = secureStorageManager.appDetails
+        val appDetail = sharedPrefConfig.appDetails
         try {
             if (!isInterstitialEmpty()) {
                 val counter = appDetail.interstitialAdFrequency.takeIf {
@@ -169,7 +169,7 @@ class InterstitialManager {
         }
 
         val adRequest = AdRequest.Builder().build()
-        val AD_UNIT: String = secureStorageManager.appDetails.admobInterstitialAd
+        val AD_UNIT: String = sharedPrefConfig.appDetails.admobInterstitialAd
         Logger.e("ADIDSSSS", "INTERSTITIAL   ${AD_UNIT}")
 
         isAdLoading = true

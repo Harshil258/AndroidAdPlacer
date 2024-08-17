@@ -13,7 +13,7 @@ import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.Logger.TAG
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.secureStorageManager
+import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 import java.util.Date
 
 class AppOpenManager {
@@ -84,11 +84,11 @@ class AppOpenManager {
             appOpenAdLoadCallback?.apply {
                 val build = AdRequest.Builder().build()
 
-                Logger.e("ADIDSSSS", "APP OPEN   ${secureStorageManager.appDetails.admobAppOpenAd}")
+                Logger.e("ADIDSSSS", "APP OPEN   ${sharedPrefConfig.appDetails.admobAppOpenAd}")
 
                 AppOpenAd.load(
                     activity.applicationContext,
-                    secureStorageManager.appDetails.admobAppOpenAd,
+                    sharedPrefConfig.appDetails.admobAppOpenAd,
                     build,
                     this
                 )
