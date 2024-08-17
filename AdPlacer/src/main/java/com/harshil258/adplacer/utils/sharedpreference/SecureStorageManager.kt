@@ -44,6 +44,13 @@ class SecureStorageManager(
         encryptedPrefs, IS_HOW_TO_USE_SHOW_DONE
     )
 
+    fun getStringPref(key: String, defaultValue: String?): String {
+        return encryptedPrefs.getString(key, defaultValue).toString()
+    }
+    fun setStringPref(key: String, value: String?) {
+        encryptedPrefs.edit()?.putString(key, value)?.apply()
+    }
+
     var isResponseGot: Boolean  = encryptedPrefs.getBoolean(IS_HOW_TO_USE_SHOW_DONE, false)
 
     override var apiResponse: ApiResponse by DataModelPreferenceDelegate(
