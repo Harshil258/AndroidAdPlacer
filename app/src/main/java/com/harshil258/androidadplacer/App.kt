@@ -55,6 +55,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     var adPlacerApplication: AdPlacerApplication? = null
 
 
+
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
@@ -100,17 +101,6 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
         }
     }
 
-    private fun isAllPermGranted(context: Context, permArr: Array<String>): Boolean {
-        var allgranted = true
-        for (it in permArr) {
-            if (ContextCompat.checkSelfPermission(context, it)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                allgranted = false
-            }
-        }
-        return allgranted
-    }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         // activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
@@ -200,6 +190,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
             if (InterstitialManager.timer != null) {
                 InterstitialManager.timer?.pause()
                 InterstitialManager.timer?.cancel()
+                Logger.d("Interstitial", "timer cancel 4")
             }
         } catch (e: Exception) {
             e.printStackTrace()

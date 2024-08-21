@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.text.TextUtils
+import android.util.Log
 import android.view.ViewGroup
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -53,44 +54,60 @@ class InterstitialManager {
 
     fun loadAndShowInter(activity: Activity, callBack: InterAdCallBack) {
         isAppInForeground = true
+        Logger.d(TAG, "loadAndShowInter: 1")
         if (checkMultipleClick(750)) {
+
             return
         }
+        Logger.d(TAG, "loadAndShowInter: 2")
         if (AppOpenManager.isAdShowing) {
             return
         }
+        Logger.d(TAG, "loadAndShowInter: 3")
         if (isAdLoading) {
+            Logger.d(TAG, "loadAndShowInter: 4")
             showLoadingDialog(activity)
             startTimerForContinueFlow(activity, 5000, callBack)
             return
         }
+        Logger.d(TAG, "loadAndShowInter: 5")
         if (isAdShowing) {
+            Logger.d(TAG, "loadAndShowInter: 6")
             stopLoadingdialog()
             return
         }
+        Logger.d(TAG, "loadAndShowInter: 7")
         if (mInterstitialAd != null) {
+            Logger.d(TAG, "loadAndShowInter: 8")
             isAdLoading = false
             if (isCounterSatisfy(activity)) {
+                Logger.d(TAG, "loadAndShowInter: 9")
                 startTimerForContinueFlow(activity, 5000, callBack)
             } else {
+                Logger.d(TAG, "loadAndShowInter: 10")
                 if (isAppInForeground) {
                     callBack.onContinueFlow()
                 }
             }
             return
         }
+        Logger.d(TAG, "loadAndShowInter: 11")
         if (isInterstitialEmpty()) {
+            Logger.d(TAG, "loadAndShowInter: 12")
             stopLoadingdialog()
             callBack.onContinueFlow()
             return
         }
 
+        Logger.d(TAG, "loadAndShowInter: 13")
         if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) {
+            Logger.d(TAG, "loadAndShowInter: 14")
             stopLoadingdialog()
             callBack.onContinueFlow()
             return
         }
         if (!AppOpenManager.isAdShowing) {
+            Logger.d(TAG, "loadAndShowInter: 15")
             if (isCounterSatisfy(activity)) {
                 loadInterAd(activity, callBack)
                 showLoadingDialog(activity)
@@ -228,6 +245,8 @@ class InterstitialManager {
         try {
             if (timer != null) {
                 timer!!.pause()
+                Logger.d(TAG, "timer cancel 1")
+
                 timer!!.cancel()
             }
         } catch (e: Exception) {
@@ -240,26 +259,32 @@ class InterstitialManager {
         duration: Long,
         callBack: InterAdCallBack
     ) {
-        timer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 1000L) {
+        timer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 500L) {
             override fun onTick(millisUntilFinished: Long) {
                 if (AppOpenManager.isAdShowing || !isAppInForeground) {
                     timer!!.pause()
                     stopLoadingdialog()
+                    Logger.d(TAG, "loadAndShowInter: millisUntilFinished ${millisUntilFinished}      111111")
                 } else if (mInterstitialAd != null && !isAdLoading) {
                     showInterAd(activity, callBack)
                     timer!!.pause()
                     stopLoadingdialog()
+                    Logger.d(TAG, "loadAndShowInter: millisUntilFinished ${millisUntilFinished}      222222")
                 }
+
             }
 
             override fun onFinish() {
                 stopLoadingdialog()
+                Logger.d(TAG, "loadAndShowInter: onFinish   1111111")
                 if (!AppOpenManager.isAdShowing) {
+                    Logger.d(TAG, "loadAndShowInter: onFinish")
                     callBack.onContinueFlow()
                 }
             }
         }
-        timer?.start()
+        Logger.d(TAG, "loadAndShowInter: TIMER STARTED")
+        timer!!.start()
     }
 
     private var dialog: Dialog? = null
@@ -320,6 +345,7 @@ class InterstitialManager {
                 callBack.onContinueFlow()
                 try {
                     if (timer != null) timer!!.cancel()
+                    Logger.d(TAG, "timer cancel 2")
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

@@ -1,7 +1,9 @@
 package com.harshil258.adplacer.utils
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.harshil258.adplacer.models.NATIVE_SIZE
@@ -39,6 +41,19 @@ fun Context.pingSite() {
             }
         }
     })
+}
+
+
+fun Context.isAllPermGranted(permArr: Array<String>): Boolean {
+    var allgranted = true
+    for (it in permArr) {
+        if (ContextCompat.checkSelfPermission(this, it)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            allgranted = false
+        }
+    }
+    return allgranted
 }
 
 object extentions {

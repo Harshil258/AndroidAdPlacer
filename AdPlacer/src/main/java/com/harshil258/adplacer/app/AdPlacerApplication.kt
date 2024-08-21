@@ -129,10 +129,10 @@ class AdPlacerApplication(private val instance: Application) {
     }
 
     fun openAdInspector() {
-        MobileAds.openAdInspector(runningActivity!!) { error ->
-            // Error will be non-null if ad inspector closed due to an error.
-            Logger.e(TAG, "opening openAdInspector  error    ${error?.message}")
-        }
+//        MobileAds.openAdInspector(runningActivity!!) { error ->
+//            // Error will be non-null if ad inspector closed due to an error.
+//            Logger.e(TAG, "opening openAdInspector  error    ${error?.message}")
+//        }
     }
 
     private fun initializeMobileAds() {
