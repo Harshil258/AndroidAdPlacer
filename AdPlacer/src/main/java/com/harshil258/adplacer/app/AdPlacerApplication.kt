@@ -115,6 +115,7 @@ class AdPlacerApplication(private val instance: Application) {
         })
     }
 
+
     private fun printActivityStack(event: String) {
         val activityNames = activityStack.map { it::class.java.simpleName }
         Log.d("ActivityLifecycle", "$event: ${activityNames.joinToString(" -> ")}")
