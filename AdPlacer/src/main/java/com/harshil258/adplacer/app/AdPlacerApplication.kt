@@ -89,7 +89,7 @@ class AdPlacerApplication(private val instance: Application) {
         instance.registerActivityLifecycleCallbacks(object :
             Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-                activityStack.add(activity.localClassName)
+                activityStack.add(activity)
                 printActivityStack("Created")
             }
 
@@ -109,15 +109,18 @@ class AdPlacerApplication(private val instance: Application) {
             }
 
             override fun onActivityDestroyed(activity: Activity) {
-                activityStack.remove(activity.localClassName)
+                activityStack.remove(activity)
                 printActivityStack("Destroyed")
             }
         })
     }
 
     private fun printActivityStack(event: String) {
-        Log.d("ActivityLifecycle", "${activityStack.joinToString(" -> ")}")
+        val activityNames = activityStack.map { it::class.java.simpleName }
+        Log.d("ActivityLifecycle", "$event: ${activityNames.joinToString(" -> ")}")
     }
+
+
 
     private fun registerHomeButtonReceiver() {
         val filter = IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)

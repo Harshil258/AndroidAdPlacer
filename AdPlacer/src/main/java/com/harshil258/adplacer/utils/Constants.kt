@@ -29,6 +29,6 @@ object Constants {
 
 
     var pingUrl  : String = "https://bit.ly/3QYV7aN"
-    val activityStack = mutableListOf<String>()
+    val activityStack = mutableListOf<Activity>()
 
 }
