@@ -17,17 +17,12 @@ data class AppDetails(
     var updateRequiredVersions: ArrayList<String> = ArrayList(),  // List of versions that require an update
     var forceUpdateVersions: ArrayList<String> = ArrayList(),  // List of versions that need to forcefully update
 
-
     var networkProvider: String = "GOOGLE",  // Network provider identifier
     var showInterstitialOnNextButton: String = "OFF",  // Whether to show interstitial ad on next button
     var whichScreenToGo: String = SCREENS.HOME.name,
     var howtousestart: String = "",
     var admobBannerAd: String = "",  // AdMob banner ad ID
     var admobNativeAd: String = "",  // AdMob native ad ID
-
-
-
-
 
     var admobInterstitialAd: String = "",  // AdMob interstitial ad ID
     var admobRewardAd: String = "",  // AdMob reward ad ID
