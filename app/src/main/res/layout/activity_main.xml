@@ -34,10 +34,18 @@
                 android:layout_height="wrap_content"
                 app:shouldLoadDirectBig="true"/>-->
 
-            <com.harshil258.adplacer.adViews.NativeBigOrSmallView
+
+
+
+            <com.harshil258.adplacer.adViews.NativeMediumView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:shouldLoadDirect="true"/>
+                app:shouldLoadDirectBig="true"/>
+
+            <com.harshil258.adplacer.adViews.NativeMediumView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shouldLoadDirectBig="true"/>
 
     <!--        <com.harshil258.adplacer.adViews.NativeSmallView
                 android:layout_width="match_parent"

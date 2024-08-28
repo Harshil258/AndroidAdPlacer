@@ -357,27 +357,35 @@ class NativeAdManager {
                 }
             }
 
-            findViewById<MediaView>(R.id.mediaView)?.setOnHierarchyChangeListener(object :
-                ViewGroup.OnHierarchyChangeListener {
-                override fun onChildViewAdded(parent: View, child: View) {
-                    val scale = context.resources.displayMetrics.density
+            if (NATIVESIZE == NATIVE_SIZE.LARGE){
+                findViewById<MediaView>(R.id.mediaView)?.setOnHierarchyChangeListener(object :
+                    ViewGroup.OnHierarchyChangeListener {
 
-                    val maxHeightPixels = 300
-                    val maxHeightDp = (maxHeightPixels * scale + 0.5f).toInt()
+                    override fun onChildViewAdded(parent: View, child: View) {
+                        val scale = context.resources.displayMetrics.density
 
-                    if (child is ImageView) { //Images
-                        val imageView = child
-                        imageView.adjustViewBounds = true
-                        imageView.maxHeight = maxHeightDp
-                    } else { //Videos
-                        val params = child.layoutParams
-                        params.height = maxHeightDp
-                        child.layoutParams = params
+                        // Define the max height in dp (use a suitable value based on your UI requirements)
+                        val maxHeightDp = 300
+                        val maxHeightPixels = (maxHeightDp * scale + 0.5f).toInt() // Convert dp to pixels
+
+                        if (child is ImageView) { // If the child is an ImageView
+                            child.adjustViewBounds = true // Allows the view to adjust its bounds while maintaining the aspect ratio
+                            child.scaleType = ImageView.ScaleType.CENTER_CROP // Adjust the image scaling
+                            child.layoutParams.height = maxHeightPixels // Set the height in pixels
+                        } else { // If the child is a video view or other types
+                            val params = child.layoutParams
+                            params.height = maxHeightPixels
+                            child.layoutParams = params
+                        }
                     }
-                }
 
-                override fun onChildViewRemoved(parent: View, child: View) {}
-            })
+                    override fun onChildViewRemoved(parent: View, child: View) {
+                        // Handle any logic if needed when a child is removed
+                    }
+                })
+            }
+
+
 //            }
 
             findViewById<TextView>(R.id.ratingTextview)?.let { starTextview ->
