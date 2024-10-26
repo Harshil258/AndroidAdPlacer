@@ -35,7 +35,7 @@ fun Context.pingSite() {
 
         override fun onResponse(call: okhttp3.Call, response: Response) {
             if (response.isSuccessful) {
-                println("Ping successful! Response code: ${response.code}")
+                println("Ping successful! Response code: ${response.code}   ${response}")
             } else {
                 println("Ping failed with response code: ${response.code}")
             }

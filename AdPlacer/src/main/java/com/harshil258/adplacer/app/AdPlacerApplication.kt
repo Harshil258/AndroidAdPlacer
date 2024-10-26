@@ -133,10 +133,9 @@ class AdPlacerApplication(private val instance: Application) {
     }
 
     fun openAdInspector() {
-//        MobileAds.openAdInspector(runningActivity!!) { error ->
-//            // Error will be non-null if ad inspector closed due to an error.
-//            Logger.e(TAG, "opening openAdInspector  error    ${error?.message}")
-//        }
+        MobileAds.openAdInspector(runningActivity!!) { error ->
+            Logger.e(TAG, "opening openAdInspector  error    ${error?.message}")
+        }
     }
 
     private fun initializeMobileAds() {
@@ -145,7 +144,6 @@ class AdPlacerApplication(private val instance: Application) {
             // Initialize the Google Mobile Ads SDK on a background thread.
             AudienceNetworkAds.initialize(instance)
             MobileAds.initialize(instance) { initializationStatus ->
-
 
                 Log.e(
                     TAG, "initializeMobileAds: DEVICE_ID_EMULATOR ${AdRequest.DEVICE_ID_EMULATOR}"
