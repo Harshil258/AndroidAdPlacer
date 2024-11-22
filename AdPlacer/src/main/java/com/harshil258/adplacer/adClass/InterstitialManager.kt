@@ -19,6 +19,8 @@ import com.harshil258.adplacer.utils.Constants.isAppInForeground
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick
 import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.Logger.ADSLOG
+import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.extentions.isInterstitialEmpty
 import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
@@ -54,69 +56,43 @@ class InterstitialManager {
 
     fun loadAndShowInter(activity: Activity, callBack: InterAdCallBack) {
         isAppInForeground = true
-        Logger.d(TAG, "loadAndShowInter: 1")
-        if (checkMultipleClick(750)) {
 
-            return
-        }
-        Logger.d(TAG, "loadAndShowInter: 2")
-        if (AppOpenManager.isAdShowing) {
-            return
-        }
-        Logger.d(TAG, "loadAndShowInter: 3")
+        if (checkMultipleClick(750)) return
+        if (AppOpenManager.isAdShowing) return
         if (isAdLoading) {
-            Logger.d(TAG, "loadAndShowInter: 4")
             showLoadingDialog(activity)
             startTimerForContinueFlow(activity, 5000, callBack)
             return
         }
-        Logger.d(TAG, "loadAndShowInter: 5")
         if (isAdShowing) {
-            Logger.d(TAG, "loadAndShowInter: 6")
             stopLoadingdialog()
             return
         }
-        Logger.d(TAG, "loadAndShowInter: 7")
         if (mInterstitialAd != null) {
-            Logger.d(TAG, "loadAndShowInter: 8")
             isAdLoading = false
             if (isCounterSatisfy(activity)) {
-                Logger.d(TAG, "loadAndShowInter: 9")
                 startTimerForContinueFlow(activity, 5000, callBack)
-            } else {
-                Logger.d(TAG, "loadAndShowInter: 10")
-                if (isAppInForeground) {
-                    callBack.onContinueFlow()
-                }
+            } else if (isAppInForeground) {
+                callBack.onContinueFlow()
             }
             return
         }
-        Logger.d(TAG, "loadAndShowInter: 11")
         if (isInterstitialEmpty()) {
-            Logger.d(TAG, "loadAndShowInter: 12")
             stopLoadingdialog()
             callBack.onContinueFlow()
             return
         }
-
-        Logger.d(TAG, "loadAndShowInter: 13")
         if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) {
-            Logger.d(TAG, "loadAndShowInter: 14")
             stopLoadingdialog()
             callBack.onContinueFlow()
             return
         }
-        if (!AppOpenManager.isAdShowing) {
-            Logger.d(TAG, "loadAndShowInter: 15")
-            if (isCounterSatisfy(activity)) {
-                loadInterAd(activity, callBack)
-                showLoadingDialog(activity)
-                startTimerForContinueFlow(activity, 5000, callBack)
-            } else {
-                if (isAppInForeground) {
-                    callBack.onContinueFlow()
-                }
-            }
+        if (!AppOpenManager.isAdShowing && isCounterSatisfy(activity)) {
+            loadInterAd(activity, callBack)
+            showLoadingDialog(activity)
+            startTimerForContinueFlow(activity, 5000, callBack)
+        } else if (isAppInForeground) {
+            callBack.onContinueFlow()
         }
     }
 
@@ -196,14 +172,14 @@ class InterstitialManager {
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
                     isAdLoading = false
                     mInterstitialAd = interstitialAd
-                    Logger.e(TAG, "onAdLoaded: AAAA")
+                    Log.i(ADSLOG, "onAdLoaded: Interstitial")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isAdLoading = false
                     mInterstitialAd = null
                     stopLoadingdialog()
-                    Logger.e(TAG, "onAdFailedToLoad: loadAdError AAAAA ${loadAdError}")
+                    Logger.e(TAG, "onAdFailedToLoad: loadAdError inter ${loadAdError}")
 
                     if (callBack != null) {
                         if (isAppInForeground) {
@@ -264,12 +240,10 @@ class InterstitialManager {
                 if (AppOpenManager.isAdShowing || !isAppInForeground) {
                     timer!!.pause()
                     stopLoadingdialog()
-                    Logger.d(TAG, "loadAndShowInter: millisUntilFinished ${millisUntilFinished}      111111")
                 } else if (mInterstitialAd != null && !isAdLoading) {
                     showInterAd(activity, callBack)
                     timer!!.pause()
                     stopLoadingdialog()
-                    Logger.d(TAG, "loadAndShowInter: millisUntilFinished ${millisUntilFinished}      222222")
                 }
 
             }
@@ -315,18 +289,15 @@ class InterstitialManager {
     }
 
     fun showInterAd(activity: Activity?, callBack: InterAdCallBack) {
-        Logger.e(TAG, "showInterAd: 1")
         if (isAdLoading) {
             stopLoadingdialog()
             callBack.onContinueFlow()
             return
         }
-        Logger.e(TAG, "showInterAd: 2")
         if (isAdShowing) {
             stopLoadingdialog()
             return
         }
-        Logger.e(TAG, "showInterAd: 3")
 
         if (mInterstitialAd == null) {
             stopLoadingdialog()
@@ -361,15 +332,15 @@ class InterstitialManager {
             }
 
             override fun onAdImpression() {
-                Logger.e(TAG, "showInterAd: 5 impression")
+                Log.i(ADSLOG, "onAdImpression: Intersitital")
+                val eventParams = mapOf("ADIMPRESSION" to "INTERSTITIAL")
+                activity?.let { logCustomEvent(it, "ADS_EVENT", eventParams) }
             }
 
             override fun onAdShowedFullScreenContent() {
-                Logger.e(TAG, "showInterAd: 6")
                 isAdShowing = true
                 stopLoadingdialog()
                 mInterstitialAd = null
-                Logger.e(TAG, "showInterAd: 7  clickCounts  $clickCounts")
                 if (clickCounts >= counter) {
                     clickCounts = 1
                 }

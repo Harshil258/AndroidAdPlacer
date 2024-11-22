@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("maven-publish")
+    id("org.lsposed.lsparanoid")
+
 }
 
 android {
@@ -17,7 +19,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -30,6 +32,14 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+
+
+    lsparanoid {
+        seed = null
+        classFilter = { true }
+        includeDependencies = false
+        variantFilter = { true }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

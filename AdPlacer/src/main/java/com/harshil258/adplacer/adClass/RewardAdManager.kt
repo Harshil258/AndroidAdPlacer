@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.text.TextUtils
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
 import com.google.android.gms.ads.AdError
@@ -19,6 +20,8 @@ import com.harshil258.adplacer.utils.Constants.isAppInForeground
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick2
 import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.Logger.ADSLOG
+import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.extentions.isRewardEmpty
 import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
@@ -137,6 +140,7 @@ class RewardAdManager {
             }
 
             override fun onAdLoaded(rewardedAd: RewardedAd) {
+                Log.i(ADSLOG, "onAdLoaded: RewardAd")
                 isAdLoading = false
                 mRewardAd = rewardedAd
             }
@@ -276,6 +280,9 @@ class RewardAdManager {
             }
 
             override fun onAdImpression() {
+                val eventParams = mapOf("ADIMPRESSION" to "REWARD")
+                activity?.let { logCustomEvent(it, "ADS_EVENT", eventParams) }
+                Log.i(ADSLOG, "onAdImpression: Rewarded")
             }
 
             override fun onAdShowedFullScreenContent() {

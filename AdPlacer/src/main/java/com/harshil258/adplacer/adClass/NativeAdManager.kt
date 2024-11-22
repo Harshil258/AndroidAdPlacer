@@ -1,6 +1,7 @@
 package com.harshil258.adplacer.adClass
 
 import android.app.Activity
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -24,6 +25,8 @@ import com.harshil258.adplacer.models.NATIVE_SIZE
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.Logger.ADSLOG
+import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.extentions.isAdStatusOn
 import com.harshil258.adplacer.utils.extentions.isNativeEmpty
 import com.harshil258.adplacer.utils.extentions.nativeAdSizeBigOrSmall
@@ -58,7 +61,7 @@ class NativeAdManager {
         ).forNativeAd { nativeAd ->
             isAdLoading = false
             Companion.nativeAd = nativeAd
-            Logger.e("NATIVELOADIMPRESSION", "LOADED")
+            Log.i(ADSLOG, "onAdLoaded: Native")
 
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -72,8 +75,9 @@ class NativeAdManager {
 
             override fun onAdImpression() {
                 super.onAdImpression()
-                Logger.e("NATIVELOADIMPRESSION", "IMPRESSION")
-
+                Log.i(ADSLOG, "onAdImpression: Native")
+                val eventParams = mapOf("ADIMPRESSION" to "NATIVE")
+                activity?.let { logCustomEvent(it, "ADS_EVENT", eventParams) }
             }
         }).withNativeAdOptions(NativeAdOptions.Builder().build()).build()
         adLoader.loadAd(AdRequest.Builder().build())
@@ -110,8 +114,8 @@ class NativeAdManager {
         val adLoader = AdLoader.Builder(
             activity, sharedPrefConfig.appDetails.admobNativeAd
         ).forNativeAd { nativeAd ->
-            Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 4 Loaded")
-            Logger.e("NATIVELOADIMPRESSION", "LOADED")
+            Log.i(ADSLOG, "onAdLoaded: Native")
+
             rlNative.visibility = View.VISIBLE
             populateNativeAdView(
                 activity, frameLayout, nativeAd, NATIVESIZE, true, adDisplayedCallback
@@ -130,8 +134,9 @@ class NativeAdManager {
 
             override fun onAdImpression() {
                 super.onAdImpression()
-                Logger.e("NATIVELOADIMPRESSION", "IMPRESSION")
-
+                Log.i(ADSLOG, "onAdImpression: Native 2")
+                val eventParams = mapOf("ADIMPRESSION" to "NATIVE")
+                activity?.let { logCustomEvent(it, "ADS_EVENT", eventParams) }
             }
         }).withNativeAdOptions(NativeAdOptions.Builder().build()).build()
         Logger.e("NATIVEADSSS", "loadNativeAdAndShow: 5")

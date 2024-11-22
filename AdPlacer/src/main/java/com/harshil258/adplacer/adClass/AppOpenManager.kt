@@ -1,6 +1,7 @@
 package com.harshil258.adplacer.adClass
 
 import android.app.Activity
+import android.util.Log
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -11,7 +12,9 @@ import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Logger
+import com.harshil258.adplacer.utils.Logger.ADSLOG
 import com.harshil258.adplacer.utils.Logger.TAG
+import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
 import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 import java.util.Date
@@ -30,6 +33,14 @@ class AppOpenManager {
                             isAdShowing = false
                             callBack.adDisplayedCallback(true)
                             loadAppOpen(activity, callBack)
+                        }
+
+                        override fun onAdImpression() {
+                            super.onAdImpression()
+                            val eventParams = mapOf("ADIMPRESSION" to "APPOPEN")
+                            logCustomEvent(activity, "ADS_EVENT", eventParams)
+                            Log.i(ADSLOG, "onAdImpression: AppOpenAd")
+
                         }
 
                         override fun onAdFailedToShowFullScreenContent(adError: AdError) {
@@ -55,7 +66,7 @@ class AppOpenManager {
         }
     }
 
-    private fun loadAppOpen(activity: Activity, callBack: AdCallback) {
+    fun loadAppOpen(activity: Activity, callBack: AdCallback) {
         if (isAdLoading) {
             return
         }
@@ -69,6 +80,8 @@ class AppOpenManager {
 
         appOpenAdLoadCallback = object : AppOpenAdLoadCallback() {
             override fun onAdLoaded(ad: AppOpenAd) {
+
+                Log.i(ADSLOG, "onAdLoaded: AppOpenAd")
                 appOpenAd = ad
                 isAdLoading = false
                 loadTime = Date().time

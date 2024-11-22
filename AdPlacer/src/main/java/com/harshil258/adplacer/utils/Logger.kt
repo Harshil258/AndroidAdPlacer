@@ -6,6 +6,7 @@ import com.harshil258.adplacer.utils.Constants.showLogs
 object Logger {
 
     private var lastLogTime: Long = System.currentTimeMillis()
+    val ADSLOG = "ADSLOG"
     val TAG = "TAG_NEO"
 
     private fun log(level: String, tag: String, message: String) {

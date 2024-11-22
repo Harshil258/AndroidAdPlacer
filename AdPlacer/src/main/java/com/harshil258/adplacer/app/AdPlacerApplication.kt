@@ -2,8 +2,8 @@ package com.harshil258.adplacer.app
 
 import android.app.Activity
 import android.app.Application
-import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
@@ -39,6 +39,7 @@ import com.harshil258.adplacer.utils.Constants.LIBRARY_PACKAGE_NAME
 import com.harshil258.adplacer.utils.Constants.activityStack
 import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 import com.harshil258.adplacer.utils.Constants.isSplashRunning
+import com.harshil258.adplacer.utils.Constants.preLoadAppopen
 import com.harshil258.adplacer.utils.Constants.preLoadInterstitial
 import com.harshil258.adplacer.utils.Constants.preLoadNative
 import com.harshil258.adplacer.utils.Constants.preLoadReward
@@ -85,7 +86,7 @@ class AdPlacerApplication(private val instance: Application) {
         instance.pingSite()
     }
 
-    private fun registerLifecycle(){
+    private fun registerLifecycle() {
         instance.registerActivityLifecycleCallbacks(object :
             Application.ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -120,7 +121,6 @@ class AdPlacerApplication(private val instance: Application) {
         val activityNames = activityStack.map { it::class.java.simpleName }
         Log.d("ActivityLifecycle", "$event: ${activityNames.joinToString(" -> ")}")
     }
-
 
 
     private fun registerHomeButtonReceiver() {
@@ -180,7 +180,6 @@ class AdPlacerApplication(private val instance: Application) {
 
     fun showAppOpenAd() {
         if (InterstitialManager.isAdShowing || RewardAdManager.isAdShowing || AppOpenManager.shouldStopAppOpen) {
-            AppOpenManager.shouldStopAppOpen = false
             return
         }
 
@@ -190,7 +189,7 @@ class AdPlacerApplication(private val instance: Application) {
                     override fun adDisplayedCallback(displayed: Boolean) {
                         if (isSplashRunning) {
                             isSplashRunning = false
-                            handler.postDelayed({ continueAppFlow() }, 750)
+                            continueAppFlow()
                         }
                     }
                 })
@@ -200,69 +199,36 @@ class AdPlacerApplication(private val instance: Application) {
 
     fun continueAppFlow() {
         messagingCallback?.startingTimerToChangeScreen()
-        Logger.d(TAG, "continueAppFlow    -->  startingTimerToChangeScreen  -->    called")
-
-        Logger.d(TAG, "continueAppFlow    -->   called")
-
         handler.removeCallbacksAndMessages(null)
-        Logger.d(TAG, "continueAppFlow    -->   removed all callbacks and messages from handler")
 
-        val activity = runningActivity
-        if (activity == null) {
-            Logger.d(TAG, "continueAppFlow    -->   runningActivity is null, returning")
-            return
-        }
+        Log.d(TAG, "continueAppFlow:1212121212 ")
+
+        val activity = runningActivity ?: return
 
         val appDetails = sharedPrefConfig.appDetails
-        Logger.d(TAG, "continueAppFlow    -->   fetched appDetails: $appDetails")
-
         val whichScreenToGo = appDetails.whichScreenToGo
-        Logger.d(TAG, "continueAppFlow    -->   whichScreenToGo: $whichScreenToGo")
-
-
-
-
-
-        Logger.d(TAG, "continueAppFlow    -->   finished running activity")
 
         when {
             appDetails.howtousestart == STATUS.ON.name && !sharedPrefConfig.isHowToUseShowDone -> {
-                Logger.e(TAG, "continueAppFlow    -->   opening HowToUseActivity")
                 messagingCallback?.openHowToUseActivity()
-
-
             }
 
             whichScreenToGo.isNotEmpty() -> {
                 when (whichScreenToGo) {
-                    SCREENS.EXTRA_START.name -> {
-                        Logger.e(TAG, "continueAppFlow    -->   opening ExtraStartActivity")
-                        messagingCallback?.openExtraStartActivity()
-                    }
-
-                    SCREENS.START.name -> {
-                        Logger.e(TAG, "continueAppFlow    -->   opening StartActivity")
-                        messagingCallback?.openStartActivity()
-                    }
-
-                    else -> {
-                        Logger.e(
-                            TAG, "continueAppFlow    -->   opening HomeActivity (default case)"
-                        )
-                        messagingCallback?.openHomeActivity()
-                    }
+                    SCREENS.EXTRA_START.name -> messagingCallback?.openExtraStartActivity()
+                    SCREENS.START.name -> messagingCallback?.openStartActivity()
+                    else -> messagingCallback?.openHomeActivity()
                 }
             }
 
             else -> {
-                Logger.e(TAG, "continueAppFlow    -->   opening HomeActivity (else case)")
                 messagingCallback?.openHomeActivity()
             }
         }
 
         isSplashRunning = false
-        Logger.e(TAG, "continueAppFlow    -->   set isSplashRunning to false")
     }
+
 
     private fun initializeAndFetchFirebaseConfig(
         onSuccess: (FirebaseRemoteConfig) -> Unit,
@@ -274,8 +240,9 @@ class AdPlacerApplication(private val instance: Application) {
         val configDefaults = mapOf("temp_response" to "default value")
         firebaseRemoteConfig.setDefaultsAsync(configDefaults)
 
-        val configSettings =
-            FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(2).build()
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(2)
+            .build()
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings)
 
         firebaseRemoteConfig.fetchAndActivate().addOnCompleteListener { task ->
@@ -294,39 +261,22 @@ class AdPlacerApplication(private val instance: Application) {
     var isContinueFlowDone = false
 
     fun fetchApiResponse(whichResponse: TYPE_OF_RESPONSE) {
-        Logger.d(TAG, "fetchApiResponse    -->   called with whichResponse = ${whichResponse.name}")
-
         if (wantToByPassResponse && sharedPrefConfig.isResponseGot) {
-            Logger.d(
-                TAG,
-                "fetchApiResponse    -->   wantToByPassResponse   calling   -->   startTimerForContinueFlow"
-            )
             startTimerForContinueFlow(0)
             isContinueFlowDone = true
         }
 
-        Logger.d(TAG, "fetchApiResponse    -->   initializing and fetching Firebase config")
-
         initializeAndFetchFirebaseConfig({ firebaseConfig ->
-            Logger.w(TAG, "fetchApiResponse    -->   got Firebase response")
             messagingCallback?.gotFirebaseResponse(firebaseConfig)
 
             if (whichResponse == TYPE_OF_RESPONSE.GOOGLE) {
                 val response = firebaseConfig.getString(whichResponse.value)
-                Logger.w(TAG, "fetchApiResponse    -->   Firebase response for GOOGLE = $response")
                 val apiResponse: ApiResponse = Gson().fromJson(response, ApiResponse::class.java)
                 handleSuccessfulApiResponse(apiResponse)
             } else {
                 LIBRARY_PACKAGE_NAME = firebaseConfig.getString("LIBRARY_PACKAGE_NAME")
                 AuthorizationADS = firebaseConfig.getString("AuthorizationADS")
                 BASE_URL_API = firebaseConfig.getString("BaseUrl")
-
-                Logger.d(
-                    TAG,
-                    "fetchApiResponse    -->   LIBRARY_PACKAGE_NAME = $LIBRARY_PACKAGE_NAME"
-                )
-                Logger.d(TAG, "fetchApiResponse    -->   AuthorizationADS = $AuthorizationADS")
-                Logger.d(TAG, "fetchApiResponse    -->   BASE_URL_API = $BASE_URL_API")
 
                 val jsonBody = JSONObject().apply {
                     put("appid", LIBRARY_PACKAGE_NAME)
@@ -336,101 +286,84 @@ class AdPlacerApplication(private val instance: Application) {
                     .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
                 val call = AdApiClient().client.create(ApiInterface::class.java).getAll(requestBody)
 
-                Logger.d(
-                    TAG,
-                    "fetchApiResponse    -->   making API call with requestBody = $jsonBody"
-                )
-
                 call?.enqueue(object : Callback<ApiResponse?> {
                     override fun onResponse(
                         call: Call<ApiResponse?>, response: Response<ApiResponse?>
                     ) {
                         if (response.isSuccessful && response.body() != null) {
-                            Logger.w(
-                                TAG,
-                                "fetchApiResponse    -->   API response successful: ${response.body()}"
-                            )
                             handleSuccessfulApiResponse(response.body()!!)
                         } else {
-                            Logger.d(
-                                TAG, "fetchApiResponse    -->   API response failure: ${
-                                    response.errorBody()?.string()
-                                }"
-                            )
                             onFailureResponse()
                         }
                     }
 
                     override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
-                        Logger.d(TAG, "fetchApiResponse    -->   API call failed: ${t.message}")
                         onFailureResponse()
                     }
                 })
             }
         }, {
-            Logger.d(
-                TAG, "fetchApiResponse    -->   Firebase config fetch failed, exiting application"
-            )
             messagingCallback?.exitTheApplication()
         })
     }
 
-
     private fun onFailureResponse() {
         startTimerForContinueFlow(2000)
-        checkAndShowAdIfAvailable()
+        preLoadAllNeededAds()
     }
 
     private fun handleSuccessfulApiResponse(response: ApiResponse) {
-        Logger.d(TAG, "handleSuccessfulApiResponse    -->   called with response: $response")
         try {
             val currentVersion = getCurrentAppVersion(runningActivity)
-            Logger.d(TAG, "handleSuccessfulApiResponse    -->   currentVersion: $currentVersion")
-
             val requiresForceUpdate =
                 response.appDetails.forceUpdateVersions.contains(currentVersion)
-            Logger.d(
+            val requiresUpdate =
+                !response.appDetails.noUpdateRequiredVersion.contains(currentVersion)
+            Log.d(TAG, "handleSuccessfulApiResponse: response  ${Gson().toJson(response)}")
+            Log.d(
                 TAG,
-                "handleSuccessfulApiResponse    -->   requiresForceUpdate: $requiresForceUpdate"
+                "handleSuccessfulApiResponse: requiresUpdate  ${requiresUpdate}   forceUpdateVersions   ${response.appDetails.forceUpdateVersions}"
             )
-
-            val requiresUpdate = response.appDetails.updateRequiredVersions.contains(currentVersion)
-            Logger.d(TAG, "handleSuccessfulApiResponse    -->   requiresUpdate: $requiresUpdate")
-
+            Log.d(
+                TAG,
+                "handleSuccessfulApiResponse: requiresUpdate  ${requiresUpdate}   update   ${response.appDetails.noUpdateRequiredVersion}"
+            )
             sharedPrefConfig.isResponseGot = true
-            Logger.d(TAG, "handleSuccessfulApiResponse    -->   set isResponseGot to true")
+            saveApiResponse(response)
 
             if (requiresForceUpdate || requiresUpdate) {
-                Logger.d(
-                    TAG,
-                    "handleSuccessfulApiResponse    -->   update required, removing callbacks and prompting for update"
-                )
                 handler.removeCallbacksAndMessages(null)
+
+                val isCancelable = !requiresForceUpdate
                 promptForUpdate(
-                    runningActivity,
-                    "Update Required",
-                    "Please update the app to the latest version.",
-                    "Later",
-                    "Update",
-                    response,
-                    requiresUpdate
+                    activity = runningActivity,
+                    title = "🔄 Update Available!",
+                    description = if (requiresForceUpdate) {
+                        "🚀 A new version is here with important updates and improvements. Please update now to continue using the app seamlessly."
+                    } else {
+                        "✨ We’ve made some exciting improvements! Update now to enjoy the latest features and a smoother experience. You can skip for now, but we recommend updating."
+                    },
+                    negativeButtonText = if (requiresForceUpdate) "" else "Later",
+                    positiveButtonText = "Update Now 🚀",
+                    response = response,
+                    isCancelable = isCancelable,
+                    negativeCallback = {
+                        if (!requiresForceUpdate) {
+                            preLoadAllNeededAds()
+                        }
+                        startTimerForContinueFlow(0)
+                    }
                 )
+
             } else {
-                Logger.d(
-                    TAG,
-                    "handleSuccessfulApiResponse    -->   no update required, saving response and continuing flow"
-                )
-                saveApiResponse(response)
                 startTimerForContinueFlow(0)
-                checkAndShowAdIfAvailable()
+                preLoadAllNeededAds()
             }
         } catch (e: Exception) {
-            Logger.e(TAG, "handleSuccessfulApiResponse    -->   exception occurred: ${e.message}")
             startTimerForContinueFlow(2000)
-            checkAndShowAdIfAvailable()
+            preLoadAllNeededAds()
         }
     }
-
 
     private fun promptForUpdate(
         activity: Activity?,
@@ -439,67 +372,91 @@ class AdPlacerApplication(private val instance: Application) {
         negativeButtonText: String,
         positiveButtonText: String,
         response: ApiResponse,
-        requiresUpdate: Boolean
+        isCancelable: Boolean,
+        negativeCallback: () -> Unit
     ) {
         val dialogCallback = object : DialogCallBack {
-            override fun onPositiveClicked(dialog: Dialog) {
-                val appPackageName = activity?.packageName
-                GlobalUtils().openLinkInBrowser(
-                    activity!!,
-                    "https://play.google.com/store/apps/details?id=$appPackageName"
-                )
+            override fun onPositiveClicked(dialog: DialogInterface) {
+                activity?.let {
+                    val appPackageName = it.packageName
+                    GlobalUtils().openLinkInBrowser(
+                        it,
+                        "https://play.google.com/store/apps/details?id=$appPackageName"
+                    )
+                }
             }
 
-            override fun onNegativeClicked(dialog: Dialog) {
-                handleDialogDismissOrCancel(response, requiresUpdate)
+            override fun onNegativeClicked(dialog: DialogInterface) {
+                if (isCancelable) {
+                    negativeCallback()
+                } else {
+                    messagingCallback?.exitTheApplication()
+                }
             }
 
             override fun onDialogCancelled() {
-                handleDialogDismissOrCancel(response, requiresUpdate)
+                if (isCancelable) {
+                    negativeCallback()
+                } else {
+                    messagingCallback?.exitTheApplication()
+                }
             }
 
             override fun onDialogDismissed() {
-                handleDialogDismissOrCancel(response, requiresUpdate)
+                if (isCancelable) {
+                    negativeCallback()
+                } else {
+                    messagingCallback?.exitTheApplication()
+                }
             }
         }
 
-        val currentVersion = getCurrentAppVersion(activity)
-        val forceUpdateRequired = response.appDetails.forceUpdateVersions.contains(currentVersion)
-        DialogUtil.createSimpleDialog(
+        DialogUtil.createMaterialSimpleDialog(
             activity = activity,
             title = title,
             description = description,
             negativeButtonText = negativeButtonText,
             positiveButtonText = positiveButtonText,
             dialogCallback = dialogCallback,
-            isCancelable = forceUpdateRequired
+            isCancelable = isCancelable
         )
+//        DialogUtil.createSimpleDialog(
+//            activity = activity,
+//            title = title,
+//            description = description,
+//            negativeButtonText = negativeButtonText,
+//            positiveButtonText = positiveButtonText,
+//            dialogCallback = dialogCallback,
+//            isCancelable = isCancelable
+//        )
     }
 
-    private fun handleDialogDismissOrCancel(response: ApiResponse, requiresUpdate: Boolean) {
-        saveApiResponse(response)
-        if (!requiresUpdate) {
-            checkAndShowAdIfAvailable()
-        }
-    }
 
-    private fun checkAndShowAdIfAvailable() {
-        if (!InterstitialManager.isAdShowing && !RewardAdManager.isAdShowing) {
-            startTimerForContinueFlow(0)
-        } else if (isSplashRunning) {
-            handler.removeCallbacksAndMessages(null)
-            isSplashRunning = false
+    private fun preLoadAllNeededAds() {
+
+
+        runningActivity?.let { currentActivity ->
+            if (preLoadInterstitial) {
+                interstitialManager.preloadInterstitialAd(
+                    currentActivity
+                )
+            }
+            if (preLoadNative) {
+                nativeAdManager.loadNativeAd(currentActivity)
+            }
+            if (preLoadReward) {
+                rewardManager.preloadRewardAd(currentActivity)
+            }
+
+            if (preLoadAppopen) {
+                appOpenManager.loadAppOpen(currentActivity, object : AdCallback {
+                    override fun adDisplayedCallback(displayed: Boolean) {}
+                })
+            }
+
+
         }
 
-        if (preLoadInterstitial) {
-            interstitialManager.preloadInterstitialAd(runningActivity!!)
-        }
-        if (preLoadNative) {
-            nativeAdManager.loadNativeAd(runningActivity!!)
-        }
-        if (preLoadReward) {
-            rewardManager.preloadRewardAd(runningActivity!!)
-        }
 
     }
 

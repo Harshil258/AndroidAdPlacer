@@ -7,7 +7,7 @@ data class ApiResponse(
 )
 
 data class AppDetails(
-    var appName: String = "wfrf",  // Application name
+    var appName: String = "Android Ad Placer",  // Application name
     var adStatus: String = "OFF",  // Status of the ads in the app
     var googleAdStatus: String = "OFF",  // Status of Google ads
     var gameZopeStatus: String = "OFF",  // Status of GameZope ads
@@ -16,6 +16,7 @@ data class AppDetails(
 
     var updateRequiredVersions: ArrayList<String> = ArrayList(),  // List of versions that require an update
     var forceUpdateVersions: ArrayList<String> = ArrayList(),  // List of versions that need to forcefully update
+    var noUpdateRequiredVersion: ArrayList<String> = arrayListOf(),  // List of versions that need to forcefully update
 
     var networkProvider: String = "GOOGLE",  // Network provider identifier
     var showInterstitialOnNextButton: String = "OFF",  // Whether to show interstitial ad on next button

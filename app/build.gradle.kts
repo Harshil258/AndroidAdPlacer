@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+
 }
 
 android {
@@ -28,6 +29,8 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -53,9 +56,9 @@ dependencies {
 
 
     implementation(libs.play.services.ads)
-    implementation  ("com.google.ads.mediation:facebook:6.17.0.0")
-    implementation ("com.facebook.android:audience-network-sdk:6.+")
-    implementation ("com.google.firebase:firebase-messaging:23.0.0")
+    implementation("com.google.ads.mediation:facebook:6.17.0.0")
+    implementation("com.facebook.android:audience-network-sdk:6.+")
+    implementation("com.google.firebase:firebase-messaging:23.0.0")
 
 
 //    implementation("com.github.Harshil258:AndroidAdPlacer:1.0.39")

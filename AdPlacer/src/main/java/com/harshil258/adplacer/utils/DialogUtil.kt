@@ -3,8 +3,8 @@ package com.harshil258.adplacer.utils
 import android.app.Activity
 import android.app.Dialog
 import android.view.LayoutInflater
-import android.widget.Button
 import android.widget.TextView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.interfaces.DialogCallBack
 
@@ -36,14 +36,19 @@ object DialogUtil {
             negativeButton.text = negativeButtonText
             positiveButton.text = positiveButtonText
 
+
             negativeButton.setOnClickListener {
                 dialogCallback.onNegativeClicked(dialog)
-                dialog.dismiss()
+                if (isCancelable) {
+                    dialog.dismiss()
+                }
             }
 
             positiveButton.setOnClickListener {
                 dialogCallback.onPositiveClicked(dialog)
-                dialog.dismiss()
+                if (isCancelable) {
+                    dialog.dismiss()
+                }
             }
 
             dialog.setOnCancelListener {
@@ -54,6 +59,47 @@ object DialogUtil {
                 dialogCallback.onDialogDismissed()
             }
 
+            dialog.show()
+        }
+    }
+
+
+    fun createMaterialSimpleDialog(
+        activity: Activity?,
+        title: String,
+        description: String,
+        negativeButtonText: String,
+        positiveButtonText: String,
+        dialogCallback: DialogCallBack,
+        isCancelable: Boolean
+    ) {
+        activity?.let {
+            // Build the Material Dialog
+            val dialog = MaterialAlertDialogBuilder(it)
+                .setTitle(title) // Set dialog title
+                .setMessage(description) // Set dialog message
+                .setCancelable(isCancelable) // Make the dialog cancelable or not
+                .setNegativeButton(negativeButtonText) { dialogInterface, _ ->
+                    dialogCallback.onNegativeClicked(dialogInterface)
+                    if (isCancelable) {
+                        dialogInterface.dismiss()
+                    }
+                }
+                .setPositiveButton(positiveButtonText) { dialogInterface, _ ->
+                    dialogCallback.onPositiveClicked(dialogInterface)
+                    if (isCancelable) {
+                        dialogInterface.dismiss()
+                    }
+                }
+                .setOnCancelListener {
+                    dialogCallback.onDialogCancelled()
+                }
+                .setOnDismissListener {
+                    dialogCallback.onDialogDismissed()
+                }
+                .create()
+
+            // Show the dialog
             dialog.show()
         }
     }

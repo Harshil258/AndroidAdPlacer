@@ -23,6 +23,7 @@ object Constants {
     var preLoadInterstitial = true
     var preLoadNative = true
     var preLoadReward = false
+    var preLoadAppopen = true
 
     var wantToByPassResponse = true
     val testDeviceIds  : ArrayList<String> = java.util.ArrayList()

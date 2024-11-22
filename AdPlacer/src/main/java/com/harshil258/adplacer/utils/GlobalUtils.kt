@@ -6,12 +6,18 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Bundle
 import android.os.SystemClock
+import android.util.Log
 import android.widget.Toast
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
 
 
 class GlobalUtils {
+
+
+
     fun isNetworkAvailable(context: Context): Boolean {
         try {
             val manager =

@@ -6,8 +6,8 @@ import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,7 +18,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -138,7 +137,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
             negativeButtonText = "Exit",
             positiveButtonText = "Retry",
             dialogCallback = object : DialogCallBack {
-                override fun onPositiveClicked(dialog: Dialog) {
+                override fun onPositiveClicked(dialog: DialogInterface) {
                     if (GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)) {
                         dialog.cancel()
                         showSplashLoader()
@@ -155,7 +154,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                     }
                 }
 
-                override fun onNegativeClicked(dialog: Dialog) {
+                override fun onNegativeClicked(dialog: DialogInterface) {
                     runningActivity!!.finishAffinity()
                     dialog.cancel()
                 }
@@ -172,7 +171,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     }
 
     override fun exitTheApplication() {
-        runningActivity?.finish()
+        runningActivity?.finishAffinity()
     }
 
     override fun onActivityStarted(activity: Activity) {

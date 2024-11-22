@@ -20,7 +20,6 @@ class HomeButtonReceiver : BroadcastReceiver() {
                     if (InterstitialManager.timer != null) {
                         InterstitialManager.timer!!.pause()
                         InterstitialManager.timer!!.cancel()
-                        Logger.d("Interstitial", "timer cancel 3")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
