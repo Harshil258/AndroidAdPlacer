@@ -369,7 +369,7 @@ class AdPlacerApplication(private val instance: Application) {
                             )
                         }
 
-                        appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
+                        else -> {
                             if (!requiresForceUpdate) {
                                 preLoadAllNeededAds()
                             }
