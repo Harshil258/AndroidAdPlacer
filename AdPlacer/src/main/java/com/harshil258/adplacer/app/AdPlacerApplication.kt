@@ -18,6 +18,10 @@ import com.facebook.ads.AudienceNetworkAds
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.gson.Gson
@@ -76,6 +80,7 @@ class AdPlacerApplication(private val instance: Application) {
     var messagingCallback: MessagingCallback? = null
     private val homeButtonReceiver: HomeButtonReceiver = HomeButtonReceiver()
     private val handler = Handler(Looper.getMainLooper())
+    private lateinit var appUpdateManager: AppUpdateManager
 
     init {
         adPlacerApplication = this
@@ -84,6 +89,8 @@ class AdPlacerApplication(private val instance: Application) {
         registerHomeButtonReceiver()
         initializeMobileAds()
         instance.pingSite()
+        appUpdateManager =
+            AppUpdateManagerFactory.create(adPlacerApplication.instance.applicationContext)
     }
 
     private fun registerLifecycle() {
@@ -335,25 +342,42 @@ class AdPlacerApplication(private val instance: Application) {
                 handler.removeCallbacksAndMessages(null)
 
                 val isCancelable = !requiresForceUpdate
-                promptForUpdate(
-                    activity = runningActivity,
-                    title = "🔄 Update Available!",
-                    description = if (requiresForceUpdate) {
-                        "🚀 A new version is here with important updates and improvements. Please update now to continue using the app seamlessly."
-                    } else {
-                        "✨ We’ve made some exciting improvements! Update now to enjoy the latest features and a smoother experience. You can skip for now, but we recommend updating."
-                    },
-                    negativeButtonText = if (requiresForceUpdate) "" else "Later",
-                    positiveButtonText = "Update Now 🚀",
-                    response = response,
-                    isCancelable = isCancelable,
-                    negativeCallback = {
-                        if (!requiresForceUpdate) {
-                            preLoadAllNeededAds()
+                val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
+                appUpdateInfoTask.addOnSuccessListener { appUpdateInfo: AppUpdateInfo ->
+                    when {
+                        // Check if an update is available and it's flexible or immediate
+                        appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE -> {
+                            promptForUpdate(
+                                activity = runningActivity,
+                                title = "🔄 Update Available!",
+                                description = if (requiresForceUpdate) {
+                                    "🚀 A new version is here with important updates and improvements. Please update now to continue using the app seamlessly."
+                                } else {
+                                    "✨ We’ve made some exciting improvements! Update now to enjoy the latest features and a smoother experience. You can skip for now, but we recommend updating."
+                                },
+                                negativeButtonText = if (requiresForceUpdate) "" else "Later",
+                                positiveButtonText = "Update Now 🚀",
+                                response = response,
+                                isCancelable = isCancelable,
+                                negativeCallback = {
+                                    if (!requiresForceUpdate) {
+                                        preLoadAllNeededAds()
+                                    }
+                                    startTimerForContinueFlow(0)
+                                }
+                            )
                         }
-                        startTimerForContinueFlow(0)
+
+                        appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
+                            if (!requiresForceUpdate) {
+                                preLoadAllNeededAds()
+                            }
+                            startTimerForContinueFlow(0)
+                        }
                     }
-                )
+                }
+
 
             } else {
                 startTimerForContinueFlow(0)

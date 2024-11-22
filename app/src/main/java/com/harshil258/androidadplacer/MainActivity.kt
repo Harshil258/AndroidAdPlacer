@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         Handler(Looper.getMainLooper()).postDelayed({
-            adPlacerApplication.openAdInspector()
+//            adPlacerApplication.openAdInspector()
         }, 5000)
 
 

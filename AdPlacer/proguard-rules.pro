@@ -44,6 +44,11 @@
 -keep class com.google.ads.mediation.** { *; }
 -keep class com.facebook.ads.** { *; }
 
+-dontwarn android.media.LoudnessCodecController$OnLoudnessCodecUpdateListener
+-dontwarn android.media.LoudnessCodecController
+-dontwarn com.harshil258.adplacer.adClass.AppOpenManager
+-dontwarn com.harshil258.adplacer.adClass.InterstitialManager$Companion
+-dontwarn com.harshil258.adplacer.adClass.InterstitialManager
 
 
 
