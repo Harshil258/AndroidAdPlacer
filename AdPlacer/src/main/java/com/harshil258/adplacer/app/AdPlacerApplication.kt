@@ -348,6 +348,11 @@ class AdPlacerApplication(private val instance: Application) {
                     when {
                         // Check if an update is available and it's flexible or immediate
                         appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE -> {
+
+                            Log.d(
+                                TAG,
+                                "12121212   handleSuccessfulApiResponse: UPDATE_AVAILABLE"
+                            )
                             promptForUpdate(
                                 activity = runningActivity,
                                 title = "🔄 Update Available!",
@@ -370,12 +375,21 @@ class AdPlacerApplication(private val instance: Application) {
                         }
 
                         else -> {
+                            Log.d(
+                                TAG,
+                                "12121212   handleSuccessfulApiResponse: else"
+                            )
                             if (!requiresForceUpdate) {
                                 preLoadAllNeededAds()
                             }
                             startTimerForContinueFlow(0)
                         }
                     }
+                }.addOnFailureListener {
+                    if (!requiresForceUpdate) {
+                        preLoadAllNeededAds()
+                    }
+                    startTimerForContinueFlow(0)
                 }
 
 
