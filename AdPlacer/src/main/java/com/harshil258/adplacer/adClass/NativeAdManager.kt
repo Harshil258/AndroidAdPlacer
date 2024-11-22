@@ -31,7 +31,7 @@ import com.harshil258.adplacer.utils.extentions.isAdStatusOn
 import com.harshil258.adplacer.utils.extentions.isNativeEmpty
 import com.harshil258.adplacer.utils.extentions.nativeAdSizeBigOrSmall
 import com.harshil258.adplacer.utils.extentions.nativeAdSizeMediumOrSmall
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 import java.util.Random
 
 class NativeAdManager {

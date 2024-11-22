@@ -15,7 +15,7 @@ import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.Logger.ADSLOG
 import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.extentions.isBannerEmpty
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 
 class BannerAdManager {
     var TAG: String = "BannerAd"

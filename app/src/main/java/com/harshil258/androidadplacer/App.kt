@@ -44,7 +44,7 @@ import com.harshil258.adplacer.utils.Constants.isSplashRunning
 import com.harshil258.adplacer.utils.Constants.shouldGoWithoutInternet
 import com.harshil258.adplacer.utils.Constants.testDeviceIds
 import com.harshil258.adplacer.utils.DialogUtil.createSimpleDialog
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 
 
 //@Obfuscate

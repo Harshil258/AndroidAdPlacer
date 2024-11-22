@@ -1,15 +1,6 @@
 package com.harshil258.adplacer.utils
 
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.SharedPreferences
-import com.google.gson.Gson
-import com.harshil258.adplacer.models.AdsDetails
-import com.harshil258.adplacer.models.ApiResponse
-import com.harshil258.adplacer.models.AppDetails
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager
-
 //class SharedPrefConfig(private val context: Context) {
 //    private val prefs: SharedPreferences? =
 //        context.getSharedPreferences("H_VEKARIYA", Context.MODE_PRIVATE)

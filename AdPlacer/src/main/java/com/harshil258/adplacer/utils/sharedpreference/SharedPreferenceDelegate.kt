@@ -1,4 +1,4 @@
-package com.zeel_enterprise.shreekhodalkotlin.common
+package com.harshil258.adplacer.utils.sharedpreference
 
 import android.content.SharedPreferences
 import androidx.core.content.edit

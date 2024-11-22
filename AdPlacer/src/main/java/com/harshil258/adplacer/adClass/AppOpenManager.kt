@@ -16,7 +16,7 @@ import com.harshil258.adplacer.utils.Logger.ADSLOG
 import com.harshil258.adplacer.utils.Logger.TAG
 import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 import java.util.Date
 
 class AppOpenManager {

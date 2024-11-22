@@ -9,7 +9,7 @@ import com.google.gson.Gson
 import com.harshil258.adplacer.models.NATIVE_SIZE
 import com.harshil258.adplacer.utils.Constants.pingUrl
 import com.harshil258.adplacer.utils.Constants.runningActivity
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 
 import okhttp3.OkHttpClient
 import okhttp3.Request

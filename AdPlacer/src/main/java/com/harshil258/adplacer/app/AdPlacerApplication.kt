@@ -59,8 +59,8 @@ import com.harshil258.adplacer.utils.STATUS
 
 import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
 import com.harshil258.adplacer.utils.pingSite
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.initSecureStorageManager
-import com.zeel_enterprise.shreekhodalkotlin.common.SecureStorageManager.Companion.sharedPrefConfig
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.initSecureStorageManager
+import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
