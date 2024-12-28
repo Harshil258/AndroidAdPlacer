@@ -7,9 +7,15 @@
 
     <meta-data
         android:name="com.google.android.gms.ads.flag.OPTIMIZE_INITIALIZATION"
-        android:value="true"/>
-
+        android:value="true" />
     <meta-data
         android:name="com.google.android.gms.ads.flag.OPTIMIZE_AD_LOADING"
-        android:value="true"/>
+        android:value="true" />
+
+    <application>
+        <activity
+            android:name=".UpdateActivity"
+            android:exported="false" />
+    </application>
+
 </manifest>

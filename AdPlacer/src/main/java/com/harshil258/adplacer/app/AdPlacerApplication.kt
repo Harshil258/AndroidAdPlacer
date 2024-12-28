@@ -25,6 +25,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.gson.Gson
+import com.harshil258.adplacer.UpdateActivity
 import com.harshil258.adplacer.adClass.AppOpenManager
 import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.adClass.NativeAdManager
@@ -337,48 +338,27 @@ class AdPlacerApplication(private val instance: Application) {
             )
             sharedPrefConfig.isResponseGot = true
             saveApiResponse(response)
-
+            Log.d(
+                TAG,
+                "1232323  handleSuccessfulApiResponse: requiresForceUpdate  ${requiresForceUpdate}   requiresUpdate   ${requiresUpdate}"
+            )
             if (requiresForceUpdate || requiresUpdate) {
                 handler.removeCallbacksAndMessages(null)
 
                 val isCancelable = !requiresForceUpdate
                 val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
                 appUpdateInfoTask.addOnSuccessListener { appUpdateInfo: AppUpdateInfo ->
                     when {
-                        // Check if an update is available and it's flexible or immediate
                         appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE -> {
-
-                            Log.d(
-                                TAG,
-                                "12121212   handleSuccessfulApiResponse: UPDATE_AVAILABLE"
-                            )
-                            promptForUpdate(
-                                activity = runningActivity,
-                                title = "🔄 Update Available!",
-                                description = if (requiresForceUpdate) {
-                                    "🚀 A new version is here with important updates and improvements. Please update now to continue using the app seamlessly."
-                                } else {
-                                    "✨ We’ve made some exciting improvements! Update now to enjoy the latest features and a smoother experience. You can skip for now, but we recommend updating."
-                                },
-                                negativeButtonText = if (requiresForceUpdate) "" else "Later",
-                                positiveButtonText = "Update Now 🚀",
-                                response = response,
-                                isCancelable = isCancelable,
-                                negativeCallback = {
-                                    if (!requiresForceUpdate) {
-                                        preLoadAllNeededAds()
-                                    }
-                                    startTimerForContinueFlow(0)
-                                }
+                            runningActivity?.startActivity(
+                                Intent(
+                                    runningActivity,
+                                    UpdateActivity::class.java
+                                )
                             )
                         }
 
                         else -> {
-                            Log.d(
-                                TAG,
-                                "12121212   handleSuccessfulApiResponse: else"
-                            )
                             if (!requiresForceUpdate) {
                                 preLoadAllNeededAds()
                             }
@@ -392,7 +372,6 @@ class AdPlacerApplication(private val instance: Application) {
                     startTimerForContinueFlow(0)
                 }
 
-
             } else {
                 startTimerForContinueFlow(0)
                 preLoadAllNeededAds()
@@ -403,74 +382,8 @@ class AdPlacerApplication(private val instance: Application) {
         }
     }
 
-    private fun promptForUpdate(
-        activity: Activity?,
-        title: String,
-        description: String,
-        negativeButtonText: String,
-        positiveButtonText: String,
-        response: ApiResponse,
-        isCancelable: Boolean,
-        negativeCallback: () -> Unit
-    ) {
-        val dialogCallback = object : DialogCallBack {
-            override fun onPositiveClicked(dialog: DialogInterface) {
-                activity?.let {
-                    val appPackageName = it.packageName
-                    GlobalUtils().openLinkInBrowser(
-                        it,
-                        "https://play.google.com/store/apps/details?id=$appPackageName"
-                    )
-                }
-            }
 
-            override fun onNegativeClicked(dialog: DialogInterface) {
-                if (isCancelable) {
-                    negativeCallback()
-                } else {
-                    messagingCallback?.exitTheApplication()
-                }
-            }
-
-            override fun onDialogCancelled() {
-                if (isCancelable) {
-                    negativeCallback()
-                } else {
-                    messagingCallback?.exitTheApplication()
-                }
-            }
-
-            override fun onDialogDismissed() {
-                if (isCancelable) {
-                    negativeCallback()
-                } else {
-                    messagingCallback?.exitTheApplication()
-                }
-            }
-        }
-
-        DialogUtil.createMaterialSimpleDialog(
-            activity = activity,
-            title = title,
-            description = description,
-            negativeButtonText = negativeButtonText,
-            positiveButtonText = positiveButtonText,
-            dialogCallback = dialogCallback,
-            isCancelable = isCancelable
-        )
-//        DialogUtil.createSimpleDialog(
-//            activity = activity,
-//            title = title,
-//            description = description,
-//            negativeButtonText = negativeButtonText,
-//            positiveButtonText = positiveButtonText,
-//            dialogCallback = dialogCallback,
-//            isCancelable = isCancelable
-//        )
-    }
-
-
-    private fun preLoadAllNeededAds() {
+    fun preLoadAllNeededAds() {
 
 
         runningActivity?.let { currentActivity ->

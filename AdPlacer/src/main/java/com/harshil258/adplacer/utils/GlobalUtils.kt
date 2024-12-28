@@ -61,17 +61,21 @@ class GlobalUtils {
     }
 
     fun openLinkInBrowser(context: Context, link: String?) {
+        // New Task: Open Link in Browser
         try {
-            if (link == null || link.trim { it <= ' ' }.isEmpty()) {
+            if (link.isNullOrBlank()) {
                 Toast.makeText(context, "Invalid link", Toast.LENGTH_SHORT).show()
                 return
             }
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Ensure a new task is created
+            }
             context.startActivity(intent)
-        } catch (e: java.lang.Exception) {
-            // Handle exception
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error opening link: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     fun privacy(context: Activity) {
         if (!checkMultipleClick(2000)) {
