@@ -438,7 +438,6 @@ class AdPlacerApplication(private val application: Application) {
 
         // Global instance reference.
         private var adPlacerInstance: AdPlacerApplication? = null
-
         // For logging and debugging.
         private const val ADS_TAG = "AdPlacerApplication"
     }
