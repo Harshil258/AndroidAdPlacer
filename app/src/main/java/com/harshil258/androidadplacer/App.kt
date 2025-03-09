@@ -30,18 +30,19 @@ import com.harshil258.adplacer.interfaces.DialogCallBack
 import com.harshil258.adplacer.interfaces.MessagingCallback
 import com.harshil258.adplacer.models.ADTYPE
 import com.harshil258.adplacer.models.TYPE_OF_RESPONSE
-import com.harshil258.adplacer.utils.Constants.runningActivity
 import com.harshil258.adplacer.utils.Constants.showLogs
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick
 import com.harshil258.adplacer.utils.Logger
 
 import com.harshil258.adplacer.R
+import com.harshil258.adplacer.adClass.AppOpenAdManager
 import com.harshil258.adplacer.adClass.InterstitialManager
 import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants
 import com.harshil258.adplacer.utils.Constants.isAppInForeground
-import com.harshil258.adplacer.utils.Constants.isSplashRunning
-import com.harshil258.adplacer.utils.Constants.shouldGoWithoutInternet
+import com.harshil258.adplacer.utils.Constants.isSplashScreenRunning
+import com.harshil258.adplacer.utils.Constants.shouldProceedWithoutInternet
 import com.harshil258.adplacer.utils.Constants.testDeviceIds
 import com.harshil258.adplacer.utils.DialogUtil.createSimpleDialog
 import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
@@ -71,9 +72,8 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
         applicationInstance = this
         adPlacerApplication = AdPlacerApplication(this)
-        adPlacerApplication?.processLifecycleRegister(this)
-        adPlacerApplication?.registerMessagingCallback(this)
-
+        adPlacerApplication?.registerLifecycleObserver(this)
+        adPlacerApplication?.registerMessagingListener(this)
         StrictMode.setThreadPolicy(ThreadPolicy.Builder().detectAll().build())
 
 
@@ -82,9 +82,9 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
-        if (!isSplashRunning) {
+        if (!isSplashScreenRunning) {
             adPlacerApplication?.showAppOpenAd()
-        } else if (isSplashRunning && adPlacerApplication?.appOpenManager?.isAdAvailable == true && !com.harshil258.adplacer.adClass.AppOpenManager.isAdShowing
+        } else if (isSplashScreenRunning && adPlacerApplication?.appOpenAdManager?.isAdAvailable == true && !AppOpenAdManager.isAdShowing
         ) {
             adPlacerApplication?.showAppOpenAd()
         } else {
@@ -94,29 +94,29 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
         super.onActivityPreCreated(activity, savedInstanceState)
-        runningActivity = activity
+        Constants.currentActivity = activity
         if (activity is LauncherActivity) {
-            isSplashRunning = true
+            isSplashScreenRunning = true
         }
     }
 
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         // activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-        runningActivity = activity
+        Constants.currentActivity = activity
         Logger.i(
             "TAGCOMMON",
-            "onActivityCreated  runningActivity  ${runningActivity?.localClassName}"
+            "onActivityCreated  Constants.currentActivity  ${Constants.currentActivity?.localClassName}"
         )
 
         if (activity is LauncherActivity) {
-            isSplashRunning = true
+            isSplashScreenRunning = true
             if (!GlobalUtils().isNetworkAvailable(applicationContext)) {
-                if (shouldGoWithoutInternet) {
-                    adPlacerApplication?.startTimerForContinueFlow(10)
+                if (shouldProceedWithoutInternet) {
+                    adPlacerApplication?.startContinueFlowTimer(10)
                     return
                 }
-                adPlacerApplication?.initClickCounts()
+                adPlacerApplication?.initializeClickCounts()
                 adPlacerApplication?.showInternetDialog()
                 return
             } else {
@@ -124,29 +124,29 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 var type = TYPE_OF_RESPONSE.API
                 type.value = "APPDETAILS12"
                 adPlacerApplication?.fetchApiResponse(type)
-                adPlacerApplication?.startTimerForContinueFlow(12000)
+                adPlacerApplication?.startContinueFlowTimer(12000)
             }
         }
     }
 
     override fun showNetworkDialog() {
         createSimpleDialog(
-            runningActivity,
+            Constants.currentActivity,
             title = "No Internet",
             description = "No internet connection!\nCheck your internet connection",
             negativeButtonText = "Exit",
             positiveButtonText = "Retry",
             dialogCallback = object : DialogCallBack {
                 override fun onPositiveClicked(dialog: DialogInterface) {
-                    if (GlobalUtils().isNetworkAvailable(runningActivity!!.applicationContext)) {
+                    if (GlobalUtils().isNetworkAvailable(Constants.currentActivity!!.applicationContext)) {
                         dialog.cancel()
                         showSplashLoader()
                         adPlacerApplication?.fetchApiResponse(TYPE_OF_RESPONSE.API)
-                        adPlacerApplication?.startTimerForContinueFlow(6000)
+                        adPlacerApplication?.startContinueFlowTimer(6000)
                     } else {
                         if (!checkMultipleClick(2000)) {
                             Toast.makeText(
-                                runningActivity!!.applicationContext,
+                                Constants.currentActivity!!.applicationContext,
                                 "Please connect to internet!",
                                 Toast.LENGTH_SHORT
                             ).show()
@@ -155,7 +155,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                 }
 
                 override fun onNegativeClicked(dialog: DialogInterface) {
-                    runningActivity!!.finishAffinity()
+                    Constants.currentActivity!!.finishAffinity()
                     dialog.cancel()
                 }
 
@@ -170,31 +170,41 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
         )
     }
 
-    override fun exitTheApplication() {
-        runningActivity?.finishAffinity()
+    override fun onFirebaseResponseReceived(firebaseConfig: FirebaseRemoteConfig) {
+
+    }
+
+    override fun startScreenTransitionTimer() {
+    }
+
+    override fun onApiResponseSaved() {
+    }
+
+    override fun exitApplication() {
+        Constants.currentActivity?.finishAffinity()
     }
 
     override fun onActivityStarted(activity: Activity) {
-        runningActivity = activity
+        Constants.currentActivity = activity
     }
 
     override fun onActivityResumed(activity: Activity) {
-        runningActivity = activity
+        Constants.currentActivity = activity
     }
 
 
     override fun onActivityPaused(activity: Activity) {
         isAppInForeground = false
         try {
-            if (InterstitialManager.timer != null) {
-                InterstitialManager.timer?.pause()
-                InterstitialManager.timer?.cancel()
+            if (InterstitialManager.flowTimer != null) {
+                InterstitialManager.flowTimer?.pause()
+                InterstitialManager.flowTimer?.cancel()
                 Logger.d("Interstitial", "timer cancel 4")
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        adPlacerApplication?.interstitialManager?.stopLoadingdialog()
+        adPlacerApplication?.interstitialAdManager?.stopLoadingDialog()
     }
 
     override fun onActivityStopped(activity: Activity) {
@@ -242,17 +252,17 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
 
     override fun openStartActivity() {
-//        val intent = Intent(runningActivity, StartActivity::class.java)
+//        val intent = Intent(Constants.currentActivity, StartActivity::class.java)
 //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //        startActivity(intent)
-//        runningActivity!!.finish()
+//        Constants.currentActivity!!.finish()
     }
 
     override fun openHomeActivity() {
         Logger.e("TAGCOMMON", "MainActivity")
 
-        runningActivity!!.finish()
-        val intent = Intent(runningActivity, MainActivity::class.java)
+        Constants.currentActivity!!.finish()
+        val intent = Intent(Constants.currentActivity, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
 
@@ -261,34 +271,22 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
 
     }
 
-    override fun gotFirebaseResponse(firebaseRemoteConfig: FirebaseRemoteConfig) {
-//        sharedPrefConfig.appDetails.admobNativeAd = "/6499/example/native-video"
 
 
-    }
-
-    override fun startingTimerToChangeScreen() {
-//        sharedPrefConfig.appDetails = sharedPrefConfig.appDetails.copy(adStatus = "OFF")
-
-    }
-
-    override fun savingApiResponse() {
-
-    }
 
     override fun openHowToUseActivity() {
-//        val intent = Intent(runningActivity, MainActivity::class.java)
+//        val intent = Intent(Constants.currentActivity, MainActivity::class.java)
 //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //        startActivity(intent)
-//        runningActivity!!.finish()
+//        Constants.currentActivity!!.finish()
     }
 
 
     override fun openExtraStartActivity() {
-//        val intent = Intent(runningActivity, StartActivity::class.java)
+//        val intent = Intent(Constants.currentActivity, StartActivity::class.java)
 //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //        startActivity(intent)
-//        runningActivity!!.finish()
+//        Constants.currentActivity!!.finish()
     }
 
     fun showExitActivityOrDialog() {
@@ -306,10 +304,10 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
             }
             if (count >= 2) {
                 openHomeActivity()
-//                val intent = Intent(runningActivity, ExitActivity::class.java)
+//                val intent = Intent(Constants.currentActivity, ExitActivity::class.java)
 //                startActivity(intent)
             } else if (count >= 1) {
-//                val intent = Intent(runningActivity, ExitActivity::class.java)
+//                val intent = Intent(Constants.currentActivity, ExitActivity::class.java)
 //                startActivity(intent)
             } else {
                 showExitDialog(ADTYPE.BANNER)
@@ -326,7 +324,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
     fun showExitDialog(type: ADTYPE) {
         if (dialogExit?.isShowing == true) return
 
-        runningActivity?.let { activity ->
+        Constants.currentActivity?.let { activity ->
             dialogExit = Dialog(activity).apply {
                 setContentView(R.layout.layout_dialog_exit)
                 window?.setLayout(
@@ -360,8 +358,7 @@ class App : Application(), LifecycleObserver, ActivityLifecycleCallbacks, Messag
                                 myAdViewBig,
                                 object :
                                     AdCallback {
-                                    override fun adDisplayedCallback(displayed: Boolean) {
-
+                                    override fun onAdDisplayed(isDisplayed: Boolean) {
                                     }
                                 })
                         }

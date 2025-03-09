@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.text.TextUtils
-import android.util.Log
 import android.view.ViewGroup
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
@@ -14,354 +13,356 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.harshil258.adplacer.R
-import com.harshil258.adplacer.interfaces.InterAdCallBack
-import com.harshil258.adplacer.utils.Constants.isAppInForeground
 import com.harshil258.adplacer.utils.GlobalUtils
-import com.harshil258.adplacer.utils.GlobalUtils.Companion.checkMultipleClick
 import com.harshil258.adplacer.utils.Logger
-import com.harshil258.adplacer.utils.Logger.ADSLOG
 import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
-import com.harshil258.adplacer.utils.extentions.isInterstitialEmpty
 import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 
 class InterstitialManager {
-    var TAG: String = "Interstitial"
+    private val TAG = "InterstitialManager"
+    private val adTimeoutDuration = 5000L
+    private val clickDebounceTime = 750L
+    private val defaultInterstitialFrequency = 3
 
-    private fun isCounterSatisfy(activity: Activity): Boolean {
-        val appDetail = sharedPrefConfig.appDetails
+    private var isAppInForeground = true
+    private var loadingDialog: Dialog? = null
+    private var lastClickTimestamp = 0L
+
+    // Dependency injection for common utilities.
+    private val globalUtils = GlobalUtils()
+
+    interface InterstitialAdCallback {
+        fun onContinueFlow()
+    }
+
+    private fun isInterstitialAdUnitEmpty(): Boolean {
+        val isEmpty = sharedPrefConfig.appDetails.admobInterstitialAd.isNullOrEmpty()
+        Logger.d(TAG, "Interstitial ad unit is empty: $isEmpty")
+        return isEmpty
+    }
+
+    private fun isMultipleClickDetected(interval: Long): Boolean {
+        val currentTimestamp = System.currentTimeMillis()
+        val isMultipleClick = currentTimestamp - lastClickTimestamp < interval
+        Logger.d(TAG, "Multiple click detected: $isMultipleClick")
+        lastClickTimestamp = currentTimestamp
+        return isMultipleClick
+    }
+
+    private fun isClickCountSufficient(activity: Activity): Boolean {
+        val appDetails = sharedPrefConfig.appDetails
         try {
-            if (!isInterstitialEmpty()) {
-                val counter = appDetail.interstitialAdFrequency.takeIf {
+            if (!isInterstitialAdUnitEmpty()) {
+                val frequency = appDetails.interstitialAdFrequency.takeIf {
                     it.isNotEmpty() && TextUtils.isDigitsOnly(it)
-                }?.toInt() ?: 3
+                }?.toInt() ?: defaultInterstitialFrequency
 
-                if (clickCounts == counter - 1) {
+                Logger.d(TAG, "Current click count: $currentClickCount, Frequency: $frequency")
+                if (currentClickCount == frequency - 1) {
+                    Logger.d(TAG, "Preloading interstitial ad due to click count")
                     preloadInterstitialAd(activity)
                 }
-                if (clickCounts >= counter) {
-                    return true
+
+                return if (currentClickCount >= frequency) {
+                    Logger.d(TAG, "Click count reached frequency")
+                    true
                 } else {
-                    clickCounts++
-                    return false
+                    currentClickCount++
+                    Logger.d(TAG, "Incrementing click count to $currentClickCount")
+                    false
                 }
             } else {
-                clickCounts = 3
+                currentClickCount = defaultInterstitialFrequency
+                Logger.d(TAG, "Interstitial ad unit empty, setting click count to default")
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(TAG, "Error in isClickCountSufficient: ${e.message}")
         }
         return false
     }
 
+    fun loadAndDisplayInterstitialAd(activity: Activity, callback: InterstitialAdCallback) {
+        Logger.d(TAG, "loadAndDisplayInterstitialAd invoked")
+        if (!isStateValidForInterstitial(activity, callback)) return
 
-    fun loadAndShowInter(activity: Activity, callBack: InterAdCallBack) {
-        isAppInForeground = true
+        if (currentInterstitialAd != null) {
+            Logger.d(TAG, "An existing interstitial ad is available. Handling it.")
+            handleExistingInterstitialAd(activity, callback)
+            return
+        }
 
-        if (checkMultipleClick(750)) return
-        if (AppOpenManager.isAdShowing) return
-        if (isAdLoading) {
+        if (isInterstitialAdUnitEmpty() || !globalUtils.isNetworkAvailable(activity.applicationContext)) {
+            Logger.d(TAG, "Ad unit empty or network unavailable. Proceeding with flow.")
+            safelyProceedFlow(callback)
+            return
+        }
+
+        if (isClickCountSufficient(activity)) {
+            Logger.d(TAG, "Click count sufficient. Loading interstitial ad.")
+            loadInterstitialAd(activity, null)
             showLoadingDialog(activity)
-            startTimerForContinueFlow(activity, 5000, callBack)
-            return
-        }
-        if (isAdShowing) {
-            stopLoadingdialog()
-            return
-        }
-        if (mInterstitialAd != null) {
-            isAdLoading = false
-            if (isCounterSatisfy(activity)) {
-                startTimerForContinueFlow(activity, 5000, callBack)
-            } else if (isAppInForeground) {
-                callBack.onContinueFlow()
-            }
-            return
-        }
-        if (isInterstitialEmpty()) {
-            stopLoadingdialog()
-            callBack.onContinueFlow()
-            return
-        }
-        if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) {
-            stopLoadingdialog()
-            callBack.onContinueFlow()
-            return
-        }
-        if (!AppOpenManager.isAdShowing && isCounterSatisfy(activity)) {
-            loadInterAd(activity, callBack)
-            showLoadingDialog(activity)
-            startTimerForContinueFlow(activity, 5000, callBack)
-        } else if (isAppInForeground) {
-            callBack.onContinueFlow()
+            startTimerToProceedFlow(activity, adTimeoutDuration, callback)
+        } else {
+            Logger.d(TAG, "Click count not sufficient. Proceeding without loading ad.")
+            safelyProceedFlow(callback)
         }
     }
 
-    fun loadAndShowInterAfterReward(
-        activity: Activity,
-        dialog: Dialog?,
-        callBack: InterAdCallBack
-    ) {
+    private fun isStateValidForInterstitial(activity: Activity, callback: InterstitialAdCallback): Boolean {
         isAppInForeground = true
 
-        if (AppOpenManager.isAdShowing) {
-            return
+        if (isMultipleClickDetected(clickDebounceTime)) {
+            Logger.d(TAG, "Multiple clicks detected. Aborting interstitial display.")
+            return false
         }
-        if (isAdLoading) {
-            if (dialog == null) {
-                showLoadingDialog(activity)
-            }
-            startTimerForContinueFlow(activity, 5000, callBack)
+        if (AppOpenAdManager.isAdShowing) {
+            Logger.d(TAG, "An App Open ad is showing. Aborting interstitial display.")
+            return false
+        }
+        if (isInterstitialAdLoading) {
+            Logger.d(TAG, "Interstitial ad is loading. Showing loading dialog and starting timer.")
+            showLoadingDialog(activity)
+            startTimerToProceedFlow(activity, adTimeoutDuration, callback)
+            return false
+        }
+        if (isInterstitialAdShowing) {
+            Logger.d(TAG, "Interstitial ad is already showing. Aborting display.")
+            stopLoadingDialog()
+            return false
+        }
+        return true
+    }
 
-
-            return
-        }
-        if (isAdShowing) {
-            stopLoadingdialog()
-            return
-        }
-        if (mInterstitialAd != null) {
-            isAdLoading = false
-            if (isCounterSatisfy(activity)) {
-                startTimerForContinueFlow(activity, 5000, callBack)
-            } else {
-                if (isAppInForeground) {
-                    callBack.onContinueFlow()
-                }
-            }
-            return
-        }
-        if (isInterstitialEmpty()) {
-            stopLoadingdialog()
-            callBack.onContinueFlow()
-            return
-        }
-
-        if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) {
-            stopLoadingdialog()
-            callBack.onContinueFlow()
-            return
-        }
-        if (!AppOpenManager.isAdShowing) {
-            if (isCounterSatisfy(activity)) {
-                loadInterAd(activity, callBack)
-                if (dialog == null) {
-                    showLoadingDialog(activity)
-                }
-                startTimerForContinueFlow(activity, 5000, callBack)
-            } else {
-                if (isAppInForeground) {
-                    callBack.onContinueFlow()
-                }
-            }
+    private fun handleExistingInterstitialAd(activity: Activity, callback: InterstitialAdCallback) {
+        isInterstitialAdLoading = false
+        Logger.d(TAG, "Handling existing interstitial ad")
+        if (isClickCountSufficient(activity)) {
+            startTimerToProceedFlow(activity, adTimeoutDuration, callback)
+        } else {
+            safelyProceedFlow(callback)
         }
     }
 
-    private fun loadInterAd(activity: Activity, callBack: InterAdCallBack?) {
-        if (isAdLoading || isAdShowing) {
+    private fun safelyProceedFlow(callback: InterstitialAdCallback) {
+        Logger.d(TAG, "Safely proceeding with flow without showing interstitial")
+        stopLoadingDialog()
+        if (isAppInForeground) {
+            callback.onContinueFlow()
+        }
+    }
+
+    private fun loadInterstitialAd(activity: Activity, callback: InterstitialAdCallback?) {
+        if (isInterstitialAdLoading || isInterstitialAdShowing) {
+            Logger.d(TAG, "Interstitial ad is either loading or already showing. Skipping load.")
             return
         }
 
         val adRequest = AdRequest.Builder().build()
-        val AD_UNIT: String = sharedPrefConfig.appDetails.admobInterstitialAd
-        Logger.e("ADIDSSSS", "INTERSTITIAL   ${AD_UNIT}")
+        val adUnitId = sharedPrefConfig.appDetails.admobInterstitialAd
+        Logger.d(TAG, "Loading interstitial ad with unit: $adUnitId")
 
-        isAdLoading = true
+        isInterstitialAdLoading = true
 
-        InterstitialAd.load(activity, AD_UNIT, adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    isAdLoading = false
-                    mInterstitialAd = interstitialAd
-                    Log.i(ADSLOG, "onAdLoaded: Interstitial")
+        InterstitialAd.load(activity, adUnitId, adRequest, object : InterstitialAdLoadCallback() {
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                isInterstitialAdLoading = false
+                currentInterstitialAd = interstitialAd
+                Logger.i(TAG, "Interstitial ad loaded successfully")
+
+                // Show ad immediately if timer is still running
+                if (flowTimer != null && isAppInForeground && callback != null) {
+                    displayInterstitialAd(activity, callback)
                 }
+            }
 
-                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    isAdLoading = false
-                    mInterstitialAd = null
-                    stopLoadingdialog()
-                    Logger.e(TAG, "onAdFailedToLoad: loadAdError inter ${loadAdError}")
+            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                isInterstitialAdLoading = false
+                currentInterstitialAd = null
+                stopLoadingDialog()
+                Logger.e(TAG, "Failed to load interstitial ad: ${loadAdError.message}")
 
-                    if (callBack != null) {
-                        if (isAppInForeground) {
-                            callBack.onContinueFlow()
-                        }
+                callback?.let {
+                    if (isAppInForeground) {
+                        it.onContinueFlow()
                     }
                 }
-            })
+            }
+        })
     }
 
     fun preloadInterstitialAd(activity: Activity) {
-        if (isAdLoading || isAdShowing) {
-            stopLoadingdialog()
+        Logger.d(TAG, "Preloading interstitial ad")
+        if (isInterstitialAdLoading || isInterstitialAdShowing) {
+            stopLoadingDialog()
+            Logger.d(TAG, "Interstitial ad is loading or showing. Skipping preload.")
             return
         }
-        if (mInterstitialAd != null) {
-            isAdLoading = false
+        if (currentInterstitialAd != null) {
+            isInterstitialAdLoading = false
+            Logger.d(TAG, "Interstitial ad already exists. Skipping preload.")
             return
         }
-        if (isInterstitialEmpty()) {
+        if (isInterstitialAdUnitEmpty()) {
+            Logger.d(TAG, "Interstitial ad unit is empty. Skipping preload.")
             return
         }
-
-        if (!GlobalUtils().isNetworkAvailable(activity.applicationContext)) {
+        if (!globalUtils.isNetworkAvailable(activity.applicationContext)) {
+            Logger.d(TAG, "Network unavailable. Skipping interstitial preload.")
             return
         }
-
-        loadInterAd(activity, null)
+        loadInterstitialAd(activity, null)
     }
 
-    fun stopLoadingdialog() {
-        try {
-            if (dialog != null && dialog!!.isShowing) {
-                dialog!!.dismiss()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        try {
-            if (timer != null) {
-                timer!!.pause()
-                Logger.d(TAG, "timer cancel 1")
-
-                timer!!.cancel()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun startTimerForContinueFlow(
+    private fun startTimerToProceedFlow(
         activity: Activity,
         duration: Long,
-        callBack: InterAdCallBack
+        callback: InterstitialAdCallback
     ) {
-        timer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 500L) {
+        Logger.d(TAG, "Starting timer for $duration ms")
+        flowTimer = object : com.harshil258.adplacer.app.CountDownTimer(duration, 500L) {
             override fun onTick(millisUntilFinished: Long) {
-                if (AppOpenManager.isAdShowing || !isAppInForeground) {
-                    timer!!.pause()
-                    stopLoadingdialog()
-                } else if (mInterstitialAd != null && !isAdLoading) {
-                    showInterAd(activity, callBack)
-                    timer!!.pause()
-                    stopLoadingdialog()
+                Logger.d(TAG, "Timer tick: $millisUntilFinished ms remaining")
+                if (AppOpenAdManager.isAdShowing || !isAppInForeground) {
+                    Logger.d(TAG, "Timer paused due to ad showing or app not in foreground")
+                    flowTimer?.pause()
+                    stopLoadingDialog()
+                } else if (currentInterstitialAd != null && !isInterstitialAdLoading) {
+                    Logger.d(TAG, "Ad is ready. Displaying interstitial ad.")
+                    displayInterstitialAd(activity, callback)
+                    flowTimer?.pause()
+                    stopLoadingDialog()
                 }
-
             }
 
             override fun onFinish() {
-                stopLoadingdialog()
-                Logger.d(TAG, "loadAndShowInter: onFinish   1111111")
-                if (!AppOpenManager.isAdShowing) {
-                    Logger.d(TAG, "loadAndShowInter: onFinish")
-                    callBack.onContinueFlow()
+                Logger.d(TAG, "Timer finished - proceeding with flow")
+                stopLoadingDialog()
+                if (!AppOpenAdManager.isAdShowing && isAppInForeground) {
+                    callback.onContinueFlow()
                 }
             }
         }
-        Logger.d(TAG, "loadAndShowInter: TIMER STARTED")
-        timer!!.start()
+        flowTimer?.start()
     }
 
-    private var dialog: Dialog? = null
+    fun stopLoadingDialog() {
+        try {
+            loadingDialog?.let {
+                if (it.isShowing) {
+                    it.dismiss()
+                    Logger.d(TAG, "Loading dialog dismissed")
+                }
+            }
+            loadingDialog = null
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error dismissing dialog: ${e.message}")
+        }
+
+        try {
+            flowTimer?.pause()
+            flowTimer?.cancel()
+            Logger.d(TAG, "Timer canceled")
+        } catch (e: Exception) {
+            Logger.e(TAG, "Error canceling timer: ${e.message}")
+        }
+    }
 
     private fun showLoadingDialog(activity: Activity) {
         try {
-            if (dialog != null && dialog?.isShowing == true) {
-                dialog?.dismiss()
+            stopLoadingDialog()
+            Logger.d(TAG, "Showing loading dialog")
+            loadingDialog = Dialog(activity).apply {
+                setContentView(R.layout.dialog_ad_loading)
+                window?.setLayout(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                setCancelable(false)
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        dialog = Dialog(activity)
-        dialog?.setContentView(R.layout.dialog_ad_loading)
-        dialog?.window?.setLayout(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog?.setCancelable(false)
-        try {
             if (!activity.isFinishing) {
-                dialog?.show()
+                loadingDialog?.show()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Logger.e(TAG, "Error showing loading dialog: ${e.message}")
         }
     }
 
-    fun showInterAd(activity: Activity?, callBack: InterAdCallBack) {
-        if (isAdLoading) {
-            stopLoadingdialog()
-            callBack.onContinueFlow()
+    fun displayInterstitialAd(activity: Activity, callback: InterstitialAdCallback) {
+        if (isInterstitialAdLoading) {
+            Logger.d(TAG, "Ad is still loading. Stopping loading dialog and continuing flow.")
+            stopLoadingDialog()
+            callback.onContinueFlow()
             return
         }
-        if (isAdShowing) {
-            stopLoadingdialog()
+        if (isInterstitialAdShowing) {
+            Logger.d(TAG, "Ad is already showing. Stopping loading dialog.")
+            stopLoadingDialog()
+            return
+        }
+        if (currentInterstitialAd == null) {
+            Logger.d(TAG, "No interstitial ad available. Stopping loading dialog and continuing flow.")
+            stopLoadingDialog()
+            callback.onContinueFlow()
             return
         }
 
-        if (mInterstitialAd == null) {
-            stopLoadingdialog()
-            callBack.onContinueFlow()
-            return
-        }
-
-        Logger.e(TAG, "showInterAd: 4")
-        mInterstitialAd!!.fullScreenContentCallback = object : FullScreenContentCallback() {
+        Logger.d(TAG, "Displaying interstitial ad")
+        currentInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
+                Logger.d(TAG, "Interstitial ad clicked")
             }
 
             override fun onAdDismissedFullScreenContent() {
-                isAdShowing = false
-                mInterstitialAd = null
-                callBack.onContinueFlow()
+                Logger.d(TAG, "Interstitial ad dismissed")
+                isInterstitialAdShowing = false
+                currentInterstitialAd = null
+                callback.onContinueFlow()
                 try {
-                    if (timer != null) timer!!.cancel()
-                    Logger.d(TAG, "timer cancel 2")
+                    flowTimer?.cancel()
+                    Logger.d(TAG, "Timer canceled on ad dismiss")
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Logger.e(TAG, "Error canceling timer on ad dismiss: ${e.message}")
                 }
-                stopLoadingdialog()
+                stopLoadingDialog()
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                isAdShowing = false
-                mInterstitialAd = null
+                Logger.e(TAG, "Failed to show interstitial ad: ${adError.message}")
+                isInterstitialAdShowing = false
+                currentInterstitialAd = null
+                stopLoadingDialog()
                 if (isAppInForeground) {
-                    callBack.onContinueFlow()
+                    callback.onContinueFlow()
                 }
             }
 
             override fun onAdImpression() {
-                Log.i(ADSLOG, "onAdImpression: Intersitital")
+                Logger.i(TAG, "Interstitial ad impression recorded")
                 val eventParams = mapOf("ADIMPRESSION" to "INTERSTITIAL")
-                activity?.let { logCustomEvent(it, "ADS_EVENT", eventParams) }
+                activity.let { logCustomEvent(it, "ADS_EVENT", eventParams) }
             }
 
             override fun onAdShowedFullScreenContent() {
-                isAdShowing = true
-                stopLoadingdialog()
-                mInterstitialAd = null
-                if (clickCounts >= counter) {
-                    clickCounts = 1
+                Logger.d(TAG, "Interstitial ad is now shown full screen")
+                isInterstitialAdShowing = true
+                stopLoadingDialog()
+                currentInterstitialAd = null
+                if (currentClickCount >= currentFrequency) {
+                    currentClickCount = 1
                 }
-
             }
         }
-
-        if (mInterstitialAd != null) {
-            isAdShowing = true
-            mInterstitialAd!!.show(activity!!)
-        }
+        isInterstitialAdShowing = true
+        currentInterstitialAd?.show(activity)
     }
 
     companion object {
-        var mInterstitialAd: InterstitialAd? = null
-
-        var isAdShowing: Boolean = false
-        private var isAdLoading = false
-        var counter: Int = 3
-        var clickCounts: Int = 3
-
-        var timer: com.harshil258.adplacer.app.CountDownTimer? = null
+        var currentInterstitialAd: InterstitialAd? = null
+        var isInterstitialAdShowing: Boolean = false
+        private var isInterstitialAdLoading = false
+        var currentFrequency: Int = 3
+        var currentClickCount: Int = 3
+        var flowTimer: com.harshil258.adplacer.app.CountDownTimer? = null
     }
 }

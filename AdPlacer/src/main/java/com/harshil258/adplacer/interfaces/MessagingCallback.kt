@@ -10,9 +10,9 @@ interface MessagingCallback {
     fun openHomeActivity()
     fun openHowToUseActivity()
     fun openExtraStartActivity()
-    fun exitTheApplication()
+    fun exitApplication()
     fun showNetworkDialog()
-    fun gotFirebaseResponse(firebaseConfig: FirebaseRemoteConfig)
-    fun startingTimerToChangeScreen()
-    fun savingApiResponse()
+    fun onFirebaseResponseReceived(firebaseConfig: FirebaseRemoteConfig)
+    fun startScreenTransitionTimer()
+    fun onApiResponseSaved()
 }

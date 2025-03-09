@@ -9,7 +9,6 @@ import android.widget.RelativeLayout
 import com.harshil258.adplacer.R
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.app.AdPlacerApplication
-import com.harshil258.adplacer.utils.Constants.adPlacerApplication
 
 class NativeMediumView : RelativeLayout {
     private var shouldLoadDirect = false
@@ -47,7 +46,7 @@ class NativeMediumView : RelativeLayout {
         // Check the shouldLoadDirect property and load the ad accordingly
         if (shouldLoadDirect) {
             loadAd(context as Activity, object : AdCallback {
-                override fun adDisplayedCallback(displayed: Boolean) {
+                override fun onAdDisplayed(isDisplayed: Boolean) {
 
                 }
             })
@@ -55,7 +54,7 @@ class NativeMediumView : RelativeLayout {
     }
 
     fun loadAd(activity: Activity?, adDisplayedCallback: AdCallback) {
-        adPlacerApplication.nativeAdManager.showAdIfLoadedMedium(
+        AdPlacerApplication.getInstance().nativeAdManager.showAdIfLoadedMedium(
             activity!!,
             rlNativeMedium!!,
             frameNativeMedium!!,

@@ -14,9 +14,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.harshil258.adplacer.app.AdPlacerApplication
 import com.harshil258.adplacer.interfaces.DialogCallBack
-import com.harshil258.adplacer.models.ApiResponse
-import com.harshil258.adplacer.utils.Constants.adPlacerApplication
-import com.harshil258.adplacer.utils.Constants.runningActivity
+import com.harshil258.adplacer.utils.Constants
 import com.harshil258.adplacer.utils.DialogUtil
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.Logger.TAG
@@ -38,7 +36,7 @@ class UpdateActivity : AppCompatActivity() {
         appUpdateManager = AppUpdateManagerFactory.create(this)
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
-        val currentVersion = getCurrentAppVersion(runningActivity)
+        val currentVersion = getCurrentAppVersion(Constants.currentActivity)
 
         val requiresForceUpdate =
             sharedPrefConfig.appDetails.forceUpdateVersions.contains(currentVersion)
@@ -52,7 +50,7 @@ class UpdateActivity : AppCompatActivity() {
                     Log.d(
                         TAG, "12121212   handleSuccessfulApiResponse: UPDATE_AVAILABLE"
                     )
-                    promptForUpdate(activity = runningActivity,
+                    promptForUpdate(activity = Constants.currentActivity,
                         title = "🔄 Update Available!",
                         description = if (requiresForceUpdate) {
                             "🚀 A new version is here with important updates and improvements. Please update now to continue using the app seamlessly."
@@ -65,9 +63,9 @@ class UpdateActivity : AppCompatActivity() {
                         negativeCallback = {
                             finish()
                             if (!requiresForceUpdate) {
-                                AdPlacerApplication.getInstance().preLoadAllNeededAds()
+                                AdPlacerApplication.getInstance().preloadAllAds()
                             }
-                            AdPlacerApplication.getInstance().startTimerForContinueFlow(0)
+                            AdPlacerApplication.getInstance().startContinueFlowTimer(0)
                         })
                 }
 
@@ -76,16 +74,16 @@ class UpdateActivity : AppCompatActivity() {
                         TAG, "12121212   handleSuccessfulApiResponse: else"
                     )
                     if (!requiresForceUpdate) {
-                        AdPlacerApplication.getInstance().preLoadAllNeededAds()
+                        AdPlacerApplication.getInstance().preloadAllAds()
                     }
-                    AdPlacerApplication.getInstance().startTimerForContinueFlow(0)
+                    AdPlacerApplication.getInstance().startContinueFlowTimer(0)
                 }
             }
         }.addOnFailureListener {
             if (!requiresForceUpdate) {
-                AdPlacerApplication.getInstance().preLoadAllNeededAds()
+                AdPlacerApplication.getInstance().preloadAllAds()
             }
-            AdPlacerApplication.getInstance().startTimerForContinueFlow(0)
+            AdPlacerApplication.getInstance().startContinueFlowTimer(0)
         }
 
     }
@@ -114,7 +112,7 @@ class UpdateActivity : AppCompatActivity() {
                 if (isCancelable) {
                     negativeCallback()
                 } else {
-                    runningActivity?.finishAffinity()
+                    Constants.currentActivity?.finishAffinity()
                 }
             }
 
@@ -122,7 +120,7 @@ class UpdateActivity : AppCompatActivity() {
                 if (isCancelable) {
                     negativeCallback()
                 } else {
-                    runningActivity?.finishAffinity()
+                    Constants.currentActivity?.finishAffinity()
                 }
             }
 
@@ -130,7 +128,7 @@ class UpdateActivity : AppCompatActivity() {
                 if (isCancelable) {
                     negativeCallback()
                 } else {
-                    runningActivity?.finishAffinity()
+                    Constants.currentActivity?.finishAffinity()
                 }
             }
         }

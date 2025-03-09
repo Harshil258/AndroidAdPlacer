@@ -9,9 +9,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.harshil258.adplacer.interfaces.InterAdCallBack
-import com.harshil258.adplacer.utils.Constants.runningActivity
-import com.harshil258.adplacer.utils.Constants.adPlacerApplication
+import com.harshil258.adplacer.adClass.InterstitialManager.InterstitialAdCallback
+import com.harshil258.adplacer.app.AdPlacerApplication
+import com.harshil258.adplacer.utils.Constants
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,15 +32,17 @@ class MainActivity : AppCompatActivity() {
 
 
         findViewById<Button>(R.id.next).setOnClickListener {
-            adPlacerApplication.interstitialManager.loadAndShowInter(runningActivity!!, object :
-                InterAdCallBack {
-                override fun onContinueFlow() {
-                    Intent(
-                        this@MainActivity,
-                        MainActivity2::class.java
-                    ).apply { startActivity(this) }
-                }
-            })
+            AdPlacerApplication.getInstance().interstitialAdManager.loadAndDisplayInterstitialAd(
+                Constants.currentActivity!!,
+                object :
+                    InterstitialAdCallback {
+                    override fun onContinueFlow() {
+                        Intent(
+                            this@MainActivity,
+                            MainActivity2::class.java
+                        ).apply { startActivity(this) }
+                    }
+                })
         }
 
 

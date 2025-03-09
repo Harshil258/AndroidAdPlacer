@@ -9,127 +9,151 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 import com.harshil258.adplacer.interfaces.AdCallback
-import com.harshil258.adplacer.utils.Constants.adPlacerApplication
-import com.harshil258.adplacer.utils.Constants.isSplashRunning
+import com.harshil258.adplacer.utils.Constants.adPlacerInstance
+import com.harshil258.adplacer.utils.Constants.isSplashScreenRunning
 import com.harshil258.adplacer.utils.Logger
-import com.harshil258.adplacer.utils.Logger.ADSLOG
-import com.harshil258.adplacer.utils.Logger.TAG
 import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
-import com.harshil258.adplacer.utils.extentions.isAppOpenEmpty
 import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 import java.util.Date
 
-class AppOpenManager {
+class AppOpenAdManager {
     private var appOpenAdLoadCallback: AppOpenAdLoadCallback? = null
-    fun showAppOpen(activity: Activity, callBack: AdCallback) {
-        if (!isAppOpenEmpty()) {
-            if (isAdAvailable || isAdShowing) {
-                if (!isAdShowing) {
-                    isAdShowing = true
-                    appOpenAd!!.fullScreenContentCallback = object : FullScreenContentCallback() {
 
-                        override fun onAdDismissedFullScreenContent() {
-                            appOpenAd = null
-                            isAdShowing = false
-                            callBack.adDisplayedCallback(true)
-                            loadAppOpen(activity, callBack)
-                        }
+    /**
+     * Displays the App Open ad if available and not already showing.
+     * If the ad is unavailable or fails to load, a new ad is loaded.
+     */
+    fun showAppOpenAd(activity: Activity, adCallback: AdCallback) {
+        Logger.d(TAG, "showAppOpenAd called")
+        if (isAdUnitIdEmpty()) {
+            Logger.d(TAG, "Ad unit ID is empty; not showing App Open ad.")
+            isAdShowing = false
+            return
+        }
 
-                        override fun onAdImpression() {
-                            super.onAdImpression()
-                            val eventParams = mapOf("ADIMPRESSION" to "APPOPEN")
-                            logCustomEvent(activity, "ADS_EVENT", eventParams)
-                            Log.i(ADSLOG, "onAdImpression: AppOpenAd")
+        if (isAdAvailable) {
+            // Only show the ad if it's not already being shown.
+            if (!isAdShowing) {
+                Logger.d(TAG, "Ad is available and not currently showing. Displaying App Open ad.")
+                isAdShowing = true
+                currentAppOpenAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        Logger.i(TAG, "App Open ad dismissed.")
+                        currentAppOpenAd = null
+                        isAdShowing = false
+                        adCallback.onAdDisplayed(true)
+                        loadAppOpenAd(activity, adCallback)
+                    }
 
-                        }
+                    override fun onAdImpression() {
+                        super.onAdImpression()
+                        val eventParams = mapOf("ADIMPRESSION" to "APPOPEN")
+                        logCustomEvent(activity, "ADS_EVENT", eventParams)
+                        Logger.i(ADS_LOG_TAG, "onAdImpression: AppOpenAd")
+                    }
 
-                        override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                            isAdShowing = false
-                        }
+                    override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                        Logger.e(TAG, "Failed to show App Open ad: ${adError.message}")
+                        isAdShowing = false
+                    }
 
-                        override fun onAdShowedFullScreenContent() {
-                            isAdShowing = true
-                            try {
-                                adPlacerApplication.messagingCallback!!.hideSplashLoader()
-                            } catch (e: Exception) {
-                                Logger.e(TAG, "onAdShowedFullScreenContent: ${e.message}")
-                            }
+                    override fun onAdShowedFullScreenContent() {
+                        Logger.i(TAG, "App Open ad is shown full screen.")
+                        isAdShowing = true
+                        try {
+                            adPlacerInstance.messagingListener?.hideSplashLoader()
+                        } catch (e: Exception) {
+                            Logger.e(TAG, "onAdShowedFullScreenContent error: ${e.message}")
                         }
                     }
-                    appOpenAd!!.show(activity)
                 }
+                currentAppOpenAd?.show(activity)
             } else {
-                loadAppOpen(activity, callBack)
+                Logger.d(TAG, "App Open ad is already showing; skipping display.")
             }
         } else {
-            isAdShowing = false
+            Logger.d(TAG, "No App Open ad available; attempting to load one.")
+            loadAppOpenAd(activity, adCallback)
         }
     }
 
-    fun loadAppOpen(activity: Activity, callBack: AdCallback) {
-        if (isAdLoading) {
-            return
-        }
-        if (isAppOpenEmpty()) {
-            return
-        }
-
-        if (appOpenAd != null) {
+    /**
+     * Loads a new App Open ad if one is not already loaded or in the process of loading.
+     */
+    fun loadAppOpenAd(activity: Activity, adCallback: AdCallback) {
+        if (isAdLoading || isAdUnitIdEmpty() || currentAppOpenAd != null) {
+            Logger.d(TAG, "Ad is already loading, available, or ad unit ID is empty; skipping load.")
             return
         }
 
         appOpenAdLoadCallback = object : AppOpenAdLoadCallback() {
             override fun onAdLoaded(ad: AppOpenAd) {
-
-                Log.i(ADSLOG, "onAdLoaded: AppOpenAd")
-                appOpenAd = ad
+                Logger.i(ADS_LOG_TAG, "onAdLoaded: AppOpenAd loaded successfully.")
+                currentAppOpenAd = ad
                 isAdLoading = false
-                loadTime = Date().time
+                adLoadTime = Date().time
 
-                if (isSplashRunning) showAppOpen(activity, callBack)
+                // If the splash screen is still running, show the ad immediately.
+                if (isSplashScreenRunning) {
+                    Logger.d(TAG, "Splash screen is running; displaying App Open ad immediately.")
+                    showAppOpenAd(activity, adCallback)
+                }
             }
 
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                Logger.e(ADS_LOG_TAG, "Failed to load App Open ad: ${loadAdError.message}")
+                isAdLoading = false
             }
         }
 
         try {
-            appOpenAdLoadCallback?.apply {
-                val build = AdRequest.Builder().build()
-
-                Logger.e("ADIDSSSS", "APP OPEN   ${sharedPrefConfig.appDetails.admobAppOpenAd}")
-
-                AppOpenAd.load(
-                    activity.applicationContext,
-                    sharedPrefConfig.appDetails.admobAppOpenAd,
-                    build,
-                    this
-                )
-            }
-
+            val adRequest = AdRequest.Builder().build()
+            Logger.d(TAG, "Loading App Open ad with unit ID: ${sharedPrefConfig.appDetails.admobAppOpenAd}")
+            AppOpenAd.load(
+                activity.applicationContext,
+                sharedPrefConfig.appDetails.admobAppOpenAd,
+                adRequest,
+                appOpenAdLoadCallback!!
+            )
             isAdLoading = true
         } catch (e: Exception) {
+            Logger.e(TAG, "Exception loading App Open ad: ${e.message}")
             isAdLoading = false
         }
     }
 
-
+    /**
+     * Returns true if an App Open ad is loaded and it was loaded within the specified number of hours.
+     */
     val isAdAvailable: Boolean
-        get() = appOpenAd != null && wasLoadTimeLessThanNHoursAgo(4)
+        get() = currentAppOpenAd != null && wasAdLoadedWithinHours(4)
 
-    private fun wasLoadTimeLessThanNHoursAgo(numHours: Long): Boolean {
-        val dateDifference = Date().time - loadTime
-        val numMilliSecondsPerHour: Long = 3600000
-        return (dateDifference < (numMilliSecondsPerHour * numHours))
+    private fun wasAdLoadedWithinHours(hours: Long): Boolean {
+        val timeSinceLoad = Date().time - adLoadTime
+        val millisecondsPerHour: Long = 3600000
+        val loadedWithinTime = timeSinceLoad < (millisecondsPerHour * hours)
+        Logger.d(TAG, "wasAdLoadedWithinHours: $loadedWithinTime (loaded $timeSinceLoad ms ago)")
+        return loadedWithinTime
+    }
+
+    /**
+     * Checks whether the ad unit ID for App Open ads is empty.
+     */
+    private fun isAdUnitIdEmpty(): Boolean {
+        val isEmpty = sharedPrefConfig.appDetails.admobAppOpenAd.isNullOrEmpty()
+        Logger.d(TAG, "isAdUnitIdEmpty: $isEmpty")
+        return isEmpty
     }
 
     companion object {
-        var appOpenAd: AppOpenAd? = null
-        @JvmField
+        var currentAppOpenAd: AppOpenAd? = null
         var isAdShowing: Boolean = false
         var isAdLoading: Boolean = false
 
-        var shouldStopAppOpen: Boolean = false
-        private var loadTime: Long = 0
+        var shouldStopAppOpenAd: Boolean = false
+        private var adLoadTime: Long = 0
+        private const val ADS_LOG_TAG = "AppOpenAdManager"
+        private const val TAG = "AppOpenAdManager"
+        // isSplashScreenRunning should be maintained by your splash screen logic.
     }
 }

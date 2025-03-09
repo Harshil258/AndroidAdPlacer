@@ -3,33 +3,31 @@ package com.harshil258.adplacer.utils
 import android.annotation.SuppressLint
 import android.app.Activity
 import com.harshil258.adplacer.app.AdPlacerApplication
-import java.util.Arrays
+
 
 @SuppressLint("StaticFieldLeak")
 object Constants {
     @Volatile
-    lateinit var adPlacerApplication: AdPlacerApplication
-    var runningActivity: Activity? = null
+    lateinit var adPlacerInstance: AdPlacerApplication
 
+    var currentActivity: Activity? = null
 
-    var AuthorizationADS = ""
-    var LIBRARY_PACKAGE_NAME = ""
+    var authorizationADS = ""
+    var libraryPackageName = ""
 
     var showLogs = false
-    var isAppInForeground: Boolean = false
-    var isSplashRunning: Boolean = false
-    var shouldGoWithoutInternet = false
+    var isAppInForeground = false
+    var isSplashScreenRunning = false
+    var shouldProceedWithoutInternet = false
 
-    var preLoadInterstitial = true
-    var preLoadNative = true
-    var preLoadReward = false
-    var preLoadAppopen = true
+    var preloadInterstitial = true
+    var preloadNative = true
+    var preloadReward = false
+    var preloadAppOpen = true
 
-    var wantToByPassResponse = true
-    val testDeviceIds  : ArrayList<String> = java.util.ArrayList()
+    var bypassApiResponse = true
+    val testDeviceIds: ArrayList<String> = ArrayList()
 
-
-    var pingUrl  : String = "https://bit.ly/3QYV7aN"
+    var pingUrl: String = "https://bit.ly/3QYV7aN"
     val activityStack = mutableListOf<Activity>()
-
 }
