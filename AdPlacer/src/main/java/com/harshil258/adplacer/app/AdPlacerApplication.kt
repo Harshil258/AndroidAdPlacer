@@ -40,6 +40,7 @@ import com.harshil258.adplacer.models.TYPE_OF_RESPONSE
 import com.harshil258.adplacer.utils.AdStatus
 import com.harshil258.adplacer.utils.Constants
 import com.harshil258.adplacer.utils.Constants.adPlacerInstance
+import com.harshil258.adplacer.utils.Constants.adStatusFromServer
 import com.harshil258.adplacer.utils.Extensions.isAppOpenAdEmpty
 import com.harshil258.adplacer.utils.HomeButtonReceiver
 import com.harshil258.adplacer.utils.Logger
@@ -378,6 +379,7 @@ class AdPlacerApplication(private val application: Application) {
     private fun saveApiResponse(apiResponse: ApiResponse) {
         sharedPrefConfig.apiResponse = apiResponse
         messagingListener?.onApiResponseSaved()
+        adStatusFromServer = apiResponse.appDetails.adStatus == "ON"
     }
 
     /**

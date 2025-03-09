@@ -9,6 +9,7 @@ import com.harshil258.adplacer.app.AdPlacerApplication
 object Constants {
     @Volatile
     lateinit var adPlacerInstance: AdPlacerApplication
+    var adStatusFromServer = false
 
     var currentActivity: Activity? = null
 
