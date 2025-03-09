@@ -11,6 +11,7 @@ import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 import com.harshil258.adplacer.interfaces.AdCallback
 import com.harshil258.adplacer.utils.Constants.adPlacerInstance
 import com.harshil258.adplacer.utils.Constants.isSplashScreenRunning
+import com.harshil258.adplacer.utils.Extensions.isAppOpenAdEmpty
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
 import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
@@ -25,7 +26,7 @@ class AppOpenAdManager {
      */
     fun showAppOpenAd(activity: Activity, adCallback: AdCallback) {
         Logger.d(TAG, "showAppOpenAd called")
-        if (isAdUnitIdEmpty()) {
+        if (isAppOpenAdEmpty()) {
             Logger.d(TAG, "Ad unit ID is empty; not showing App Open ad.")
             isAdShowing = false
             return
@@ -81,7 +82,7 @@ class AppOpenAdManager {
      * Loads a new App Open ad if one is not already loaded or in the process of loading.
      */
     fun loadAppOpenAd(activity: Activity, adCallback: AdCallback) {
-        if (isAdLoading || isAdUnitIdEmpty() || currentAppOpenAd != null) {
+        if (isAdLoading || isAppOpenAdEmpty() || currentAppOpenAd != null) {
             Logger.d(TAG, "Ad is already loading, available, or ad unit ID is empty; skipping load.")
             return
         }
@@ -134,15 +135,6 @@ class AppOpenAdManager {
         val loadedWithinTime = timeSinceLoad < (millisecondsPerHour * hours)
         Logger.d(TAG, "wasAdLoadedWithinHours: $loadedWithinTime (loaded $timeSinceLoad ms ago)")
         return loadedWithinTime
-    }
-
-    /**
-     * Checks whether the ad unit ID for App Open ads is empty.
-     */
-    private fun isAdUnitIdEmpty(): Boolean {
-        val isEmpty = sharedPrefConfig.appDetails.admobAppOpenAd.isNullOrEmpty()
-        Logger.d(TAG, "isAdUnitIdEmpty: $isEmpty")
-        return isEmpty
     }
 
     companion object {

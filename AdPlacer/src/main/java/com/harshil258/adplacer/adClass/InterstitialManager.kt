@@ -13,6 +13,7 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.harshil258.adplacer.R
+import com.harshil258.adplacer.utils.Extensions.isInterstitialAdEmpty
 import com.harshil258.adplacer.utils.GlobalUtils
 import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.commonFunctions.logCustomEvent
@@ -35,11 +36,6 @@ class InterstitialManager {
         fun onContinueFlow()
     }
 
-    private fun isInterstitialAdUnitEmpty(): Boolean {
-        val isEmpty = sharedPrefConfig.appDetails.admobInterstitialAd.isNullOrEmpty()
-        Logger.d(TAG, "Interstitial ad unit is empty: $isEmpty")
-        return isEmpty
-    }
 
     private fun isMultipleClickDetected(interval: Long): Boolean {
         val currentTimestamp = System.currentTimeMillis()
@@ -52,7 +48,7 @@ class InterstitialManager {
     private fun isClickCountSufficient(activity: Activity): Boolean {
         val appDetails = sharedPrefConfig.appDetails
         try {
-            if (!isInterstitialAdUnitEmpty()) {
+            if (!isInterstitialAdEmpty()) {
                 val frequency = appDetails.interstitialAdFrequency.takeIf {
                     it.isNotEmpty() && TextUtils.isDigitsOnly(it)
                 }?.toInt() ?: defaultInterstitialFrequency
@@ -91,7 +87,7 @@ class InterstitialManager {
             return
         }
 
-        if (isInterstitialAdUnitEmpty() || !globalUtils.isNetworkAvailable(activity.applicationContext)) {
+        if (isInterstitialAdEmpty() || !globalUtils.isNetworkAvailable(activity.applicationContext)) {
             Logger.d(TAG, "Ad unit empty or network unavailable. Proceeding with flow.")
             safelyProceedFlow(callback)
             return
@@ -99,7 +95,7 @@ class InterstitialManager {
 
         if (isClickCountSufficient(activity)) {
             Logger.d(TAG, "Click count sufficient. Loading interstitial ad.")
-            loadInterstitialAd(activity, null)
+            loadInterstitialAd(activity, callback)
             showLoadingDialog(activity)
             startTimerToProceedFlow(activity, adTimeoutDuration, callback)
         } else {
@@ -182,6 +178,8 @@ class InterstitialManager {
                 Logger.e(TAG, "Failed to load interstitial ad: ${loadAdError.message}")
 
                 callback?.let {
+                    Logger.e(TAG, "Failed to load interstitial ad: ${loadAdError.message}  isAppInForeground  $isAppInForeground")
+
                     if (isAppInForeground) {
                         it.onContinueFlow()
                     }
@@ -202,7 +200,7 @@ class InterstitialManager {
             Logger.d(TAG, "Interstitial ad already exists. Skipping preload.")
             return
         }
-        if (isInterstitialAdUnitEmpty()) {
+        if (isInterstitialAdEmpty()) {
             Logger.d(TAG, "Interstitial ad unit is empty. Skipping preload.")
             return
         }

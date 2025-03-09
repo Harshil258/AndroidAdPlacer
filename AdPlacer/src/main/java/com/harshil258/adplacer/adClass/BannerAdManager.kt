@@ -98,10 +98,4 @@ class BannerAdManager {
         }
     }
 
-    // Checks if the banner ad unit is empty.
-    private fun isBannerAdEmpty(): Boolean {
-        val isEmpty = sharedPrefConfig.appDetails.admobBannerAd.isNullOrEmpty()
-        Logger.d(TAG, "isBannerAdEmpty: $isEmpty")
-        return isEmpty
-    }
 }
