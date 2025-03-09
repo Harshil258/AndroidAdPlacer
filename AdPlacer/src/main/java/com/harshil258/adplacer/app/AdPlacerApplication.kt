@@ -39,6 +39,7 @@ import com.harshil258.adplacer.models.SCREENS
 import com.harshil258.adplacer.models.TYPE_OF_RESPONSE
 import com.harshil258.adplacer.utils.AdStatus
 import com.harshil258.adplacer.utils.Constants
+import com.harshil258.adplacer.utils.Constants.adPlacerInstance
 import com.harshil258.adplacer.utils.Extensions.isAppOpenAdEmpty
 import com.harshil258.adplacer.utils.HomeButtonReceiver
 import com.harshil258.adplacer.utils.Logger
@@ -422,22 +423,12 @@ class AdPlacerApplication(private val application: Application) {
     }
 
     companion object {
-        /**
-         * Returns the singleton instance of AdPlacerApplication.
-         */
-        fun initialize(app: Application): AdPlacerApplication {
-            return adPlacerInstance ?: synchronized(this) {
-                adPlacerInstance ?: AdPlacerApplication(app).also { adPlacerInstance = it }
-            }
-        }
 
         fun getInstance(): AdPlacerApplication {
             return adPlacerInstance
                 ?: throw IllegalStateException("AdPlacerApplication is not initialized")
         }
 
-        // Global instance reference.
-        private var adPlacerInstance: AdPlacerApplication? = null
         // For logging and debugging.
         private const val ADS_TAG = "AdPlacerApplication"
     }
