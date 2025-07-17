@@ -17,6 +17,7 @@ import com.harshil258.adplacer.interfaces.DialogCallBack
 import com.harshil258.adplacer.utils.Constants
 import com.harshil258.adplacer.utils.DialogUtil
 import com.harshil258.adplacer.utils.GlobalUtils
+import com.harshil258.adplacer.utils.Logger
 import com.harshil258.adplacer.utils.Logger.TAG
 import com.harshil258.adplacer.utils.sharedpreference.SecureStorageManager.Companion.sharedPrefConfig
 
