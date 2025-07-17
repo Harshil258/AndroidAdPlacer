@@ -24,7 +24,7 @@ object Logger {
 
     private fun log(level: String, tag: String, message: String) {
         if (!showLogs) return
-//        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG){
             val currentTime = System.currentTimeMillis()
             val timeElapsed = currentTime - lastLogTime
             Logger.lastLogTime = currentTime
@@ -40,7 +40,7 @@ object Logger {
                 "ERROR" -> Log.e(tag, logMessage)
                 else -> Log.d(tag, logMessage)
             }
-//        }
+        }
 
 
     }

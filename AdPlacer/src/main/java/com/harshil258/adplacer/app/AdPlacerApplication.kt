@@ -107,7 +107,7 @@ class AdPlacerApplication(private val application: Application) {
      */
     private fun logActivityStack(event: String) {
         val activityNames = Constants.activityStack.map { it::class.java.simpleName }
-        Log.d("ActivityLifecycle", "$event: ${activityNames.joinToString(" -> ")}")
+        Logger.d("ActivityLifecycle", "$event: ${activityNames.joinToString(" -> ")}")
     }
 
     /**
@@ -142,10 +142,10 @@ class AdPlacerApplication(private val application: Application) {
             // Initialize Facebook Audience Network ads.
             AudienceNetworkAds.initialize(application)
             MobileAds.initialize(application) { initializationStatus ->
-                Log.e(ADS_TAG, "initializeMobileAds: DEVICE_ID_EMULATOR ${AdRequest.DEVICE_ID_EMULATOR}")
-                Log.e(ADS_TAG, "initializeMobileAds: testDeviceIds ${Constants.testDeviceIds.toSet()}")
+                Logger.e(ADS_TAG, "initializeMobileAds: DEVICE_ID_EMULATOR ${AdRequest.DEVICE_ID_EMULATOR}")
+                Logger.e(ADS_TAG, "initializeMobileAds: testDeviceIds ${Constants.testDeviceIds.toSet()}")
                 Constants.testDeviceIds.add(AdRequest.DEVICE_ID_EMULATOR)
-                Log.e(ADS_TAG, "initializeMobileAds: after adding testDeviceIds ${Constants.testDeviceIds.toSet()}")
+                Logger.e(ADS_TAG, "initializeMobileAds: after adding testDeviceIds ${Constants.testDeviceIds.toSet()}")
 
                 val requestConfig = RequestConfiguration.Builder()
                     .setTestDeviceIds(Constants.testDeviceIds)
@@ -201,7 +201,7 @@ class AdPlacerApplication(private val application: Application) {
     fun continueAppFlow() {
         messagingListener?.startScreenTransitionTimer()
         mainHandler.removeCallbacksAndMessages(null)
-        Log.d(ADS_TAG, "continueAppFlow invoked")
+        Logger.d(ADS_TAG, "continueAppFlow invoked")
 
         val currentActivity = Constants.currentActivity ?: return
         val appDetails = sharedPrefConfig.appDetails
@@ -319,7 +319,7 @@ class AdPlacerApplication(private val application: Application) {
             val currentVersion = getAppVersion(Constants.currentActivity)
             val requiresForceUpdate = apiResponse.appDetails.forceUpdateVersions.contains(currentVersion)
             val requiresUpdate = !apiResponse.appDetails.noUpdateRequiredVersion.contains(currentVersion)
-            Log.d(ADS_TAG, "API Response: ${Gson().toJson(apiResponse)}")
+            Logger.d(ADS_TAG, "API Response: ${Gson().toJson(apiResponse)}")
             sharedPrefConfig.isResponseGot = true
             saveApiResponse(apiResponse)
 

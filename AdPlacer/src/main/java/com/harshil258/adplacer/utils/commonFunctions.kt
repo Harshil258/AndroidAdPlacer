@@ -12,7 +12,7 @@ object commonFunctions {
         eventName: String,
         eventParams: Map<String, String>
     ) {
-        Log.d("TAG23535", "logCustomEvent: eventName  ${eventName}")
+        Logger.d("TAG23535", "logCustomEvent: eventName  ${eventName}")
         // Get Firebase Analytics instance
         val firebaseAnalytics = FirebaseAnalytics.getInstance(context)
 

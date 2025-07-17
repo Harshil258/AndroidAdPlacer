@@ -47,7 +47,7 @@ class UpdateActivity : AppCompatActivity() {
                 // Check if an update is available and it's flexible or immediate
                 appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE -> {
 
-                    Log.d(
+                    Logger.d(
                         TAG, "12121212   handleSuccessfulApiResponse: UPDATE_AVAILABLE"
                     )
                     promptForUpdate(activity = Constants.currentActivity,
@@ -70,7 +70,7 @@ class UpdateActivity : AppCompatActivity() {
                 }
 
                 else -> {
-                    Log.d(
+                    Logger.d(
                         TAG, "12121212   handleSuccessfulApiResponse: else"
                     )
                     if (!requiresForceUpdate) {
@@ -101,7 +101,7 @@ class UpdateActivity : AppCompatActivity() {
             override fun onPositiveClicked(dialog: DialogInterface) {
                 activity?.let {
                     val appPackageName = it.packageName
-                    Log.d(TAG, "onPositiveClicked: appPackageName ${appPackageName}")
+                    Logger.d(TAG, "onPositiveClicked: appPackageName ${appPackageName}")
                     GlobalUtils().openLinkInBrowser(
                         it, "https://play.google.com/store/apps/details?id=$appPackageName"
                     )
