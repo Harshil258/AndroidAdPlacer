@@ -45,6 +45,7 @@ class UpdateActivity : AppCompatActivity() {
 
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo: AppUpdateInfo ->
             when {
+
                 // Check if an update is available and it's flexible or immediate
                 appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE -> {
 
